@@ -2,10 +2,24 @@ package com.workify.auth.models;
 
 
 import jakarta.persistence.*;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
+@ToString
 
 @Entity
 @Table(name = "app_user")
-public class User {
+public class User implements UserDetails {
+    @Getter
     @Id
     @GeneratedValue
     private Integer id;
@@ -15,73 +29,33 @@ public class User {
     private String email;
     private Integer mobile;
     private String password;
-
-    public User(Integer id, String firstName, String lastName, String username, String email, Integer mobile, String password) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.username = username;
-        this.email = email;
-        this.mobile = mobile;
-        this.password = password;
-    }
-    public User() {}
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
 
-    public void setId(Integer id) {
-        this.id = id;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
-
-    public void setMobile(Integer mobile) {
-        this.mobile = mobile;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public Integer getMobile() {
-        return mobile;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
 }
