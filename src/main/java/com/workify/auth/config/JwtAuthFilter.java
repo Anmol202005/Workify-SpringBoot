@@ -1,5 +1,6 @@
 package com.workify.auth.config;
 
+import com.workify.auth.service.Jwtservice;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,7 +14,7 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
-    final JwtService jwtService;
+    final Jwtservice Jwtservice;
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
@@ -25,6 +26,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
         final String token = authHeader.replace("Bearer ", "");
-        username=jwtService.extractusername(token);
+        username=Jwtservice.extractusername(token);
     }
 }
