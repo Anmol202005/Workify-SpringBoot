@@ -15,6 +15,7 @@ import java.util.List;
 @Setter
 @Getter
 @ToString
+@Builder
 
 @Entity
 @Table(name = "app_user")
