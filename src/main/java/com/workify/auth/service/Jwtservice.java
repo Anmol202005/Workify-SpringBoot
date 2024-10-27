@@ -17,6 +17,7 @@ import java.util.function.Function;
 
 @Service
 public class Jwtservice {
+    //this should be minimum 256 bits
     private static final String SECRET_KEY = "27bc5821f84be3dca9696869c6248a4bbbf23e30906f1a6c7c2b79ce30e3c32a";
     public String extractusername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -44,6 +45,20 @@ public class Jwtservice {
             //compact() is the method which gonna generate the token....
             .compact();
     }
+
+    //method which can identify is token valid or not
+    public boolean isTokenValid(String token , UserDetails userDetails) {
+        final String username = extractusername(token);
+        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    }
+
+    private boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+        private Date extractExpiration(String token) {
+            return extractClaim(token, Claims::getExpiration);
+        }
 
     private Claims extractAllClaims(String token){
         return Jwts
