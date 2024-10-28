@@ -1,5 +1,6 @@
 package com.workify.auth.models;
 
+import jakarta.annotation.Nonnull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,10 +11,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterRequest {
+    @Nonnull
     private String firstName;
+    @Nonnull
     private String lastName;
+    @Nonnull
     private String username;
-    private String email;
-    private Integer mobile;
+    @Nonnull
+    private String contact;
+    @Nonnull
     private String password;
 }
