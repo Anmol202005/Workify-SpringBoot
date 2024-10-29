@@ -62,4 +62,5 @@ public class AuthService {
         String body="Your verification code is "+otp;
         emailService.sendEmail(Email,subject,body);
     }
+
 }
