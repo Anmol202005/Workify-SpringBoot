@@ -28,6 +28,9 @@ public class AuthService {
         if(repository.existsByEmail(request.getEmail())){
             return ("Email already exists");
         }
+        if (request.getUsername().length() >= 10) {
+            return "Username must be less than 10 characters";
+        }
         var user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
