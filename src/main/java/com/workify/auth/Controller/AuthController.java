@@ -4,6 +4,7 @@ import com.workify.auth.models.AuthenticationRequest;
 import com.workify.auth.models.AuthenticationResponse;
 import com.workify.auth.models.RegisterRequest;
 import com.workify.auth.service.AuthService;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(
             @RequestBody RegisterRequest request
-    ){
+    ) throws MessagingException {
         return ResponseEntity.ok(service.register(request));
 
     }
