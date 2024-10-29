@@ -20,6 +20,10 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
     public String register(RegisterRequest request) throws MessagingException {
+        var checkUser=repository.findByUsername(request.getUsername()).orElseThrow();
+        if(checkUser != null){
+            return ("Username already exists");
+        }
         var user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
