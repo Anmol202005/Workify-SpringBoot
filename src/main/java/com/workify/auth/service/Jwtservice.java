@@ -17,7 +17,7 @@ import java.util.function.Function;
 
 @Service
 public class Jwtservice {
-    //this should be minimum 256 bits
+    //this should be minimum 256 bits encryption key
     private static final String SECRET_KEY = "27bc5821f84be3dca9696869c6248a4bbbf23e30906f1a6c7c2b79ce30e3c32a";
     public String extractusername(String token) {
         return extractClaim(token, Claims::getSubject);
