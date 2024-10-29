@@ -19,7 +19,7 @@ public class AuthService {
     private final Jwtservice jwtService;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
-    public AuthenticationResponse register(RegisterRequest request) throws MessagingException {
+    public String register(RegisterRequest request) throws MessagingException {
         var user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
@@ -35,10 +35,9 @@ public class AuthService {
         user.setOtp(otp);
         repository.save(user);
         sendVerificationEmail(user.getEmail(),otp);
-        var jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder()
-                .token(jwtToken)
-                .build();
+
+        return ("OTP sent to "+user.getEmail());
+
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -62,5 +61,23 @@ public class AuthService {
         String body="Your verification code is "+otp;
         emailService.sendEmail(Email,subject,body);
     }
+    public AuthenticationResponse generateToken(User user) {
+        var jwtToken = jwtService.generateToken(user);
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .build();
+    }
 
+    public AuthenticationResponse validate(OtpValidate request) {
+        var user=repository.findByUsername(request.getUsername()).orElseThrow();
+        if(user.getOtp().equals(request.getOtp())){
+            var jwtToken = jwtService.generateToken(user);
+            return AuthenticationResponse.builder()
+                    .token(jwtToken)
+                    .build();
+        }else {
+            throw new RuntimeException("Invalid OTP provided.");
+        }
+
+    }
 }
