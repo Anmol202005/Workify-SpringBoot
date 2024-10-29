@@ -1,9 +1,6 @@
 package com.workify.auth.Controller;
 
-import com.workify.auth.models.AuthenticationRequest;
-import com.workify.auth.models.AuthenticationResponse;
-import com.workify.auth.models.OtpValidate;
-import com.workify.auth.models.RegisterRequest;
+import com.workify.auth.models.*;
 import com.workify.auth.service.AuthService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -34,10 +31,16 @@ public class AuthController {
     ){
         return ResponseEntity.ok(service.validate(request));
     }
-    @PutMapping("/forgot-password")
+    @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(
             @RequestBody String username
     ) throws MessagingException {
         return ResponseEntity.ok(service.forgotPassword(username));
+    }
+    @PutMapping("/verify-otp")
+    public ResponseEntity<String> verify(
+            @RequestBody ValidateForgotPasswordRequest otp
+    ){
+        return ResponseEntity.ok(service.verifyForgotPassword(otp));
     }
 }

@@ -82,11 +82,23 @@ public class AuthService {
     }
 
     public String forgotPassword(String username) throws MessagingException {
-        User user = repository.findByUsername(username).orElseThrow();
+        var user = repository.findByUsername(username).orElseThrow();
         String otp= generateotp();
         user.setOtp(otp);
         repository.save(user);
         sendVerificationEmail(user.getEmail(),otp);
         return ("OTP sent to "+user.getEmail());
+    }
+
+    public String verifyForgotPassword(ValidateForgotPasswordRequest request) {
+        var user=repository.findByUsername(request.getUsername()).orElseThrow();
+        if(user.getOtp().equals(request.getOtp()) && request.getNewPassword().equals(request.getConfirmPassword()) ){
+            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            repository.save(user);
+            return ("Password changed successfully");
+        }
+        else {
+            throw new RuntimeException("Invalid OTP provided.");
+        }
     }
 }
