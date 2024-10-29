@@ -34,4 +34,10 @@ public class AuthController {
     ){
         return ResponseEntity.ok(service.validate(request));
     }
+    @PutMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(
+            @RequestBody String username
+    ) throws MessagingException {
+        return ResponseEntity.ok(service.forgotPassword(username));
+    }
 }

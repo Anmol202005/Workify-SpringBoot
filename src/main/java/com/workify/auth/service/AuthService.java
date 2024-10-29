@@ -80,4 +80,13 @@ public class AuthService {
         }
 
     }
+
+    public String forgotPassword(String username) throws MessagingException {
+        User user = repository.findByUsername(username).orElseThrow();
+        String otp= generateotp();
+        user.setOtp(otp);
+        repository.save(user);
+        sendVerificationEmail(user.getEmail(),otp);
+        return ("OTP sent to "+user.getEmail());
+    }
 }
