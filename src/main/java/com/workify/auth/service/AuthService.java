@@ -31,15 +31,27 @@ public class AuthService {
             if (userOptional.isPresent() && userOptional.get().getVerified()) {
                 return "Username already exists";
             }
-            //return ("Username already exists");
+
         }
 
         if(repository.existsByEmail(request.getEmail())){
+            Optional<User> userOptional = repository.findByUsername(request.getUsername());
 
-            return ("Email already exists");
+            if (userOptional.isPresent() && userOptional.get().getVerified()) {
+
+            return ("Email already exists");}
         }
         if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
             return "Username must be less than 15 characters and greater than 5";
+        }
+        if(request.getFirstName().isEmpty()){
+            return "First name is required";
+        }
+        if(request.getEmail().isEmpty()){
+            return "Email is required";
+        }
+        if (request.getPassword().length() >= 10 || request.getPassword().length() < 5) {
+            return "Password must be greater than 5 characters and less than 10";
         }
         var user = User.builder()
                 .firstName(request.getFirstName())
@@ -100,6 +112,13 @@ public class AuthService {
     }
 
     public AuthenticationResponse validate(OtpValidate request) {
+        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
+            return  AuthenticationResponse.builder()
+                    .token(null)
+                    .message("Username must be less than 15 characters and greater than 5")
+                    .build();
+        }
+
         var user=repository.findByUsername(request.getUsername()).orElseThrow();
         long minuteElapsed = ChronoUnit.MINUTES.between(user.getOtpGenerated(), LocalDateTime.now());
         if(user.getOtp().equals(request.getOtp()) && minuteElapsed < 5){
@@ -116,6 +135,9 @@ public class AuthService {
     }
 
     public String forgotPassword(String username) throws MessagingException {
+        if (username.length() >= 15 || username.length() < 5) {
+            return "Username must be less than 15 characters and greater than 5";
+        }
         var user = repository.findByUsername(username).orElseThrow();
         String otp= generateotp();
         user.setOtp(otp);
@@ -125,6 +147,12 @@ public class AuthService {
     }
 
     public String verifyForgotPassword(ValidateForgotPasswordRequest request) {
+        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
+            return "Username must be less than 15 characters and greater than 5";
+        }
+        if (request.getNewPassword().length() >= 10 || request.getNewPassword().length() < 5) {
+            return "Password must be greater than 5 characters and less than 10";
+        }
         var user=repository.findByUsername(request.getUsername()).orElseThrow();
         if(user.getOtp().equals(request.getOtp()) && request.getNewPassword().equals(request.getConfirmPassword()) ){
             user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -132,7 +160,11 @@ public class AuthService {
             return ("Password changed successfully");
         }
         else {
-            throw new RuntimeException("Invalid OTP provided.");
+            if(!user.getOtp().equals(request.getOtp()))
+            {return("OTP invalid");}
+            else{
+                return "Confirm Password not same as New password";
+            }
         }
     }
 }

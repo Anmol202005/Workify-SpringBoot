@@ -33,9 +33,9 @@ public class AuthController {
     }
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(
-            @RequestBody String username
+            @RequestBody ForgotPasswordRequest request
     ) throws MessagingException {
-        return ResponseEntity.ok(service.forgotPassword(username));
+        return ResponseEntity.ok(service.forgotPassword(request.getUsername()));
     }
     @PutMapping("/verify-otp")
     public ResponseEntity<String> verify(
