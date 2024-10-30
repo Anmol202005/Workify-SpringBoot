@@ -50,21 +50,65 @@ public class AuthService {
                     .message("Username must be less than 15 characters and greater than 5")
                     .build();
         }
+        if (request.getUsername().contains(" ")) {
+            return ResponseMessage.builder()
+                    .message("Username must not contain spaces")
+                    .build();
+        }
         if(request.getFirstName().isEmpty()){
             return ResponseMessage.builder()
                     .message("First name is required")
                     .build();
         }
+        if(request.getFirstName().length()>20){
+            return ResponseMessage.builder()
+                    .message("First name can not be longer than 20 characters")
+                    .build();
+        }
+        if(request.getLastName().length()>20){
+            return ResponseMessage.builder()
+                    .message("Last name can not be longer than 20 characters")
+                    .build();
+        }
+
         if(request.getEmail().isEmpty()){
             return ResponseMessage.builder()
                     .message("Email is required")
                     .build();
         }
-        if (request.getPassword().length() >= 10 || request.getPassword().length() < 5) {
+
+        String password = request.getPassword();
+        if (password.length() < 8 || password.length()>20) {
             return ResponseMessage.builder()
-                    .message("Password must be greater than 5 characters and less than 10")
+                    .message("Password must greater than 8 characters and less than 20 characters")
                     .build();
         }
+        if (!password.matches(".*[A-Z].*")) {
+            return ResponseMessage.builder()
+                    .message("Password must contain at least one uppercase letter")
+                    .build();
+        }
+        if (!password.matches(".*[a-z].*")) {
+            return ResponseMessage.builder()
+                    .message("Password must contain at least one lowercase letter")
+                    .build();
+        }
+        if (!password.matches(".*\\d.*")) {
+            return ResponseMessage.builder()
+                    .message("Password must contain at least one digit")
+                    .build();
+        }
+        if (!password.matches(".*[!@#$%^&*()\\-_=+{};:,<.>].*")) {
+            return ResponseMessage.builder()
+                    .message("Password must contain at least one special character")
+                    .build();
+        }
+        if (password.contains(" ")) {
+            return ResponseMessage.builder()
+                    .message("Password must not contain spaces")
+                    .build();
+        }
+
         var user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
@@ -184,11 +228,38 @@ public class AuthService {
                     .message("Username must be less than 15 characters and greater than 5")
                     .build();
         }
-        if (request.getNewPassword().length() >= 10 || request.getNewPassword().length() < 5) {
+        String password = request.getNewPassword();
+        if (password.length() < 8 || password.length()>20) {
             return ResponseMessage.builder()
-                    .message("Password must be greater than 5 characters and less than 10")
+                    .message("Password must greater than 8 characters and less than 20 characters")
                     .build();
         }
+        if (!password.matches(".*[A-Z].*")) {
+            return ResponseMessage.builder()
+                    .message("Password must contain at least one uppercase letter")
+                    .build();
+        }
+        if (!password.matches(".*[a-z].*")) {
+            return ResponseMessage.builder()
+                    .message("Password must contain at least one lowercase letter")
+                    .build();
+        }
+        if (!password.matches(".*\\d.*")) {
+            return ResponseMessage.builder()
+                    .message("Password must contain at least one digit")
+                    .build();
+        }
+        if (!password.matches(".*[!@#$%^&*()\\-_=+{};:,<.>].*")) {
+            return ResponseMessage.builder()
+                    .message("Password must contain at least one special character")
+                    .build();
+        }
+        if (password.contains(" ")) {
+            return ResponseMessage.builder()
+                    .message("Password must not contain spaces")
+                    .build();
+        }
+
         var user=repository.findByUsername(request.getUsername()).orElseThrow();
         if(user.getOtp().equals(request.getOtp()) && request.getNewPassword().equals(request.getConfirmPassword()) ){
             user.setPassword(passwordEncoder.encode(request.getNewPassword()));
