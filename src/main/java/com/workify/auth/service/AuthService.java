@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -25,14 +26,20 @@ public class AuthService {
     public String register(RegisterRequest request) throws MessagingException {
 
         if(repository.existsByUsername(request.getUsername())){
-            return ("Username already exists");
+            Optional<User> userOptional = repository.findByUsername(request.getUsername());
+
+            if (userOptional.isPresent() && userOptional.get().getVerified()) {
+                return "Username already exists";
+            }
+            //return ("Username already exists");
         }
 
         if(repository.existsByEmail(request.getEmail())){
+
             return ("Email already exists");
         }
-        if (request.getUsername().length() >= 10) {
-            return "Username must be less than 10 characters";
+        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
+            return "Username must be less than 15 characters and greater than 5";
         }
         var user = User.builder()
                 .firstName(request.getFirstName())
@@ -42,6 +49,7 @@ public class AuthService {
                 .mobile(request.getMobile())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.CANDIDATE)
+                .verified(false)
                 .build();
 
 
@@ -55,14 +63,23 @@ public class AuthService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
+            return  AuthenticationResponse.builder()
+                    .token(null)
+                    .message("Username must be less than 15 characters and greater than 5")
+                    .build();
+        }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
                         request.getPassword()));
         var user=repository.findByUsername(request.getUsername()).orElseThrow();
+        user.setVerified(true);
+        repository.save(user);
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .message("Token Generated Successfully")
                 .build();
     }
     private String generateotp(){
@@ -86,6 +103,8 @@ public class AuthService {
         var user=repository.findByUsername(request.getUsername()).orElseThrow();
         long minuteElapsed = ChronoUnit.MINUTES.between(user.getOtpGenerated(), LocalDateTime.now());
         if(user.getOtp().equals(request.getOtp()) && minuteElapsed < 5){
+            user.setVerified(true);
+            repository.save(user);
             var jwtToken = jwtService.generateToken(user);
             return AuthenticationResponse.builder()
                     .token(jwtToken)
