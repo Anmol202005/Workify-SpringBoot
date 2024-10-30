@@ -9,6 +9,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Random;
 
 @Service
@@ -44,9 +47,9 @@ public class AuthService {
 
         String otp= generateotp();
         user.setOtp(otp);
+        user.setOtpGenerated(LocalDateTime.now());
         repository.save(user);
         sendVerificationEmail(user.getEmail(),otp);
-
         return ("OTP sent to "+user.getEmail());
 
     }
@@ -81,7 +84,8 @@ public class AuthService {
 
     public AuthenticationResponse validate(OtpValidate request) {
         var user=repository.findByUsername(request.getUsername()).orElseThrow();
-        if(user.getOtp().equals(request.getOtp())){
+        long minuteElapsed = ChronoUnit.MINUTES.between(user.getOtpGenerated(), LocalDateTime.now());
+        if(user.getOtp().equals(request.getOtp()) && minuteElapsed < 5){
             var jwtToken = jwtService.generateToken(user);
             return AuthenticationResponse.builder()
                     .token(jwtToken)
