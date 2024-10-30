@@ -23,13 +23,15 @@ public class AuthService {
     private final Jwtservice jwtService;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
-    public String register(RegisterRequest request) throws MessagingException {
+    public ResponseMessage register(RegisterRequest request) throws MessagingException {
 
         if(repository.existsByUsername(request.getUsername())){
             Optional<User> userOptional = repository.findByUsername(request.getUsername());
 
             if (userOptional.isPresent() && userOptional.get().getVerified()) {
-                return "Username already exists";
+                return ResponseMessage.builder()
+                        .message("Username already exists")
+                        .build();
             }
 
         }
@@ -38,20 +40,30 @@ public class AuthService {
             Optional<User> userOptional = repository.findByUsername(request.getUsername());
 
             if (userOptional.isPresent() && userOptional.get().getVerified()) {
-
-            return ("Email already exists");}
+                return ResponseMessage.builder()
+                        .message("Email already exists")
+                        .build();
+            }
         }
         if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
-            return "Username must be less than 15 characters and greater than 5";
+            return ResponseMessage.builder()
+                    .message("Username must be less than 15 characters and greater than 5")
+                    .build();
         }
         if(request.getFirstName().isEmpty()){
-            return "First name is required";
+            return ResponseMessage.builder()
+                    .message("First name is required")
+                    .build();
         }
         if(request.getEmail().isEmpty()){
-            return "Email is required";
+            return ResponseMessage.builder()
+                    .message("Email is required")
+                    .build();
         }
         if (request.getPassword().length() >= 10 || request.getPassword().length() < 5) {
-            return "Password must be greater than 5 characters and less than 10";
+            return ResponseMessage.builder()
+                    .message("Password must be greater than 5 characters and less than 10")
+                    .build();
         }
         var user = User.builder()
                 .firstName(request.getFirstName())
@@ -70,7 +82,9 @@ public class AuthService {
         user.setOtpGenerated(LocalDateTime.now());
         repository.save(user);
         sendVerificationEmail(user.getEmail(),otp);
-        return ("OTP sent to "+user.getEmail());
+        return ResponseMessage.builder()
+                .message("OTP sent to "+user.getEmail())
+                .build();
 
     }
 
@@ -134,36 +148,52 @@ public class AuthService {
 
     }
 
-    public String forgotPassword(String username) throws MessagingException {
+    public ResponseMessage forgotPassword(String username) throws MessagingException {
         if (username.length() >= 15 || username.length() < 5) {
-            return "Username must be less than 15 characters and greater than 5";
+            return ResponseMessage.builder()
+                    .message("Username should be greater than 5 characters and less than 15")
+                    .build();
         }
         var user = repository.findByUsername(username).orElseThrow();
         String otp= generateotp();
         user.setOtp(otp);
         repository.save(user);
         sendVerificationEmail(user.getEmail(),otp);
-        return ("OTP sent to "+user.getEmail());
+//        return ("OTP sent to "+user.getEmail());
+        return ResponseMessage.builder()
+                .message("OTP sent to "+user.getEmail())
+                .build();
     }
 
-    public String verifyForgotPassword(ValidateForgotPasswordRequest request) {
+    public ResponseMessage verifyForgotPassword(ValidateForgotPasswordRequest request) {
         if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
-            return "Username must be less than 15 characters and greater than 5";
+            return ResponseMessage.builder()
+                    .message("Username must be less than 15 characters and greater than 5")
+                    .build();
         }
         if (request.getNewPassword().length() >= 10 || request.getNewPassword().length() < 5) {
-            return "Password must be greater than 5 characters and less than 10";
+            return ResponseMessage.builder()
+                    .message("Password must be greater than 5 characters and less than 10")
+                    .build();
         }
         var user=repository.findByUsername(request.getUsername()).orElseThrow();
         if(user.getOtp().equals(request.getOtp()) && request.getNewPassword().equals(request.getConfirmPassword()) ){
             user.setPassword(passwordEncoder.encode(request.getNewPassword()));
             repository.save(user);
-            return ("Password changed successfully");
+            return ResponseMessage.builder()
+                    .message("Password changed successfully")
+                    .build();
         }
         else {
             if(!user.getOtp().equals(request.getOtp()))
-            {return("OTP invalid");}
+            {return ResponseMessage.builder()
+                        .message("OTP invalid")
+                        .build();
+                }
             else{
-                return "Confirm Password not same as New password";
+                return ResponseMessage.builder()
+                        .message("Confirm Password not same as New password")
+                        .build();
             }
         }
     }

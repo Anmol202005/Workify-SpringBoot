@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthService service;
     @PostMapping("/register")
-    public ResponseEntity<String> register(
+    public ResponseEntity<ResponseMessage> register(
             @RequestBody RegisterRequest request
     ) throws MessagingException {
         return ResponseEntity.ok(service.register(request));
@@ -32,13 +32,13 @@ public class AuthController {
         return ResponseEntity.ok(service.validate(request));
     }
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(
+    public ResponseEntity<ResponseMessage> forgotPassword(
             @RequestBody ForgotPasswordRequest request
     ) throws MessagingException {
         return ResponseEntity.ok(service.forgotPassword(request.getUsername()));
     }
     @PutMapping("/verify-otp")
-    public ResponseEntity<String> verify(
+    public ResponseEntity<ResponseMessage> verify(
             @RequestBody ValidateForgotPasswordRequest otp
     ){
         return ResponseEntity.ok(service.verifyForgotPassword(otp));
