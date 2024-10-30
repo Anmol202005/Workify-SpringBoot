@@ -4,6 +4,8 @@ import com.workify.auth.models.*;
 import com.workify.auth.repository.UserRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +25,7 @@ public class AuthService {
     private final Jwtservice jwtService;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
+    private final TwilioService twilioService;
     public ResponseMessage register(RegisterRequest request)  {
 
         if(repository.existsByUsername(request.getUsername())){
@@ -71,9 +74,9 @@ public class AuthService {
                     .build();
         }
 
-        if(request.getEmail().isEmpty()){
+        if(request.getEmail()==null && request.getMobile().isEmpty()){
             return ResponseMessage.builder()
-                    .message("Email is required")
+                    .message("Either Email or Mobile number is required")
                     .build();
         }
 
@@ -126,17 +129,13 @@ public class AuthService {
         user.setOtp(otp);
         user.setOtpGenerated(LocalDateTime.now());
         repository.save(user);
-        try {
-            sendVerificationEmail(user.getEmail(), otp);
-        } catch (MessagingException e) {
-            return ResponseMessage.builder()
-                    .message("Failed to send verification email.")
-                    .build();
+        if(user.getEmail()!=null){
+           return sendVerificationEmail(user.getEmail(), otp);
         }
+        else{
+           return twilioService.sendOtp(request.getMobile(), otp);
 
-        return ResponseMessage.builder()
-                .message("OTP sent to "+user.getEmail())
-                .build();
+        }
 
     }
 
@@ -165,10 +164,13 @@ public class AuthService {
        int otpvalue= 100000+random.nextInt(900000);
        return String.valueOf(otpvalue);
     }
-    private void sendVerificationEmail(String Email,String otp) throws MessagingException {
-        String subject="Verification mail";
-        String body="Your verification code is "+otp;
-        emailService.sendEmail(Email,subject,body);
+    public ResponseMessage sendVerificationEmail(String email, String otp) {
+        String subject = "Verification Mail";
+        String body = "Your verification code is " + otp;
+
+        return emailService.sendEmail(email, subject, body);
+        // Return success response if email is sent successfully
+
     }
     public AuthenticationResponse generateToken(User user) {
         var jwtToken = jwtService.generateToken(user);
@@ -180,9 +182,18 @@ public class AuthService {
     public AuthenticationResponse validate(OtpValidate request) {
         if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
             return  AuthenticationResponse.builder()
-                    .token(null)
                     .message("Username must be less than 15 characters and greater than 5")
                     .build();
+        }
+        if(repository.existsByUsername(request.getUsername())){
+            Optional<User> userOptional = repository.findByUsername(request.getUsername());
+
+            if (userOptional.isPresent() && userOptional.get().getVerified()) {
+                return AuthenticationResponse.builder()
+                        .message("Username already exists")
+                        .build();
+            }
+
         }
 
         var user=repository.findByUsername(request.getUsername()).orElseThrow();
@@ -195,7 +206,9 @@ public class AuthService {
                     .token(jwtToken)
                     .build();
         }else {
-            throw new RuntimeException("Invalid OTP provided.");
+            return AuthenticationResponse.builder()
+                    .message("invalid OTP")
+                    .build();
         }
 
     }
@@ -210,17 +223,13 @@ public class AuthService {
         String otp= generateotp();
         user.setOtp(otp);
         repository.save(user);
-        try {
-            sendVerificationEmail(user.getEmail(), otp);
-        } catch (MessagingException e) {
-            return ResponseMessage.builder()
-                    .message("Failed to send verification email.")
-                    .build();
+        if(user.getEmail()!=null){
+            return sendVerificationEmail(user.getEmail(), otp);
         }
-//        return ("OTP sent to "+user.getEmail());
-        return ResponseMessage.builder()
-                .message("OTP sent to "+user.getEmail())
-                .build();
+        else{
+            return twilioService.sendOtp(user.getMobile(), otp);
+
+        }
     }
 
     public ResponseMessage verifyForgotPassword(ValidateForgotPasswordRequest request) {
