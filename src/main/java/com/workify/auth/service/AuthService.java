@@ -108,6 +108,7 @@ public class AuthService {
                     .message("Password must not contain spaces")
                     .build();
         }
+        Role role = request.getRole() != null ? request.getRole() : Role.CANDIDATE;
 
         var user = User.builder()
                 .firstName(request.getFirstName())
@@ -116,7 +117,7 @@ public class AuthService {
                 .username(request.getUsername())
                 .mobile(request.getMobile())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.CANDIDATE)
+                .role(role)
                 .verified(false)
                 .build();
 
