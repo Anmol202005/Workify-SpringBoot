@@ -23,7 +23,7 @@ public class AuthService {
     private final Jwtservice jwtService;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
-    public ResponseMessage register(RegisterRequest request) throws MessagingException {
+    public ResponseMessage register(RegisterRequest request)  {
 
         if(repository.existsByUsername(request.getUsername())){
             Optional<User> userOptional = repository.findByUsername(request.getUsername());
@@ -81,7 +81,14 @@ public class AuthService {
         user.setOtp(otp);
         user.setOtpGenerated(LocalDateTime.now());
         repository.save(user);
-        sendVerificationEmail(user.getEmail(),otp);
+        try {
+            sendVerificationEmail(user.getEmail(), otp);
+        } catch (MessagingException e) {
+            return ResponseMessage.builder()
+                    .message("Failed to send verification email.")
+                    .build();
+        }
+
         return ResponseMessage.builder()
                 .message("OTP sent to "+user.getEmail())
                 .build();
@@ -148,7 +155,7 @@ public class AuthService {
 
     }
 
-    public ResponseMessage forgotPassword(String username) throws MessagingException {
+    public ResponseMessage forgotPassword(String username)  {
         if (username.length() >= 15 || username.length() < 5) {
             return ResponseMessage.builder()
                     .message("Username should be greater than 5 characters and less than 15")
@@ -158,7 +165,13 @@ public class AuthService {
         String otp= generateotp();
         user.setOtp(otp);
         repository.save(user);
-        sendVerificationEmail(user.getEmail(),otp);
+        try {
+            sendVerificationEmail(user.getEmail(), otp);
+        } catch (MessagingException e) {
+            return ResponseMessage.builder()
+                    .message("Failed to send verification email.")
+                    .build();
+        }
 //        return ("OTP sent to "+user.getEmail());
         return ResponseMessage.builder()
                 .message("OTP sent to "+user.getEmail())
