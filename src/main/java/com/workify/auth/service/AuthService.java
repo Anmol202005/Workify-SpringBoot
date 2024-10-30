@@ -4,11 +4,17 @@ import com.workify.auth.models.*;
 import com.workify.auth.repository.UserRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -19,7 +25,94 @@ public class AuthService {
     private final Jwtservice jwtService;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
-    public String register(RegisterRequest request) throws MessagingException {
+    private final TwilioService twilioService;
+    public ResponseMessage register(RegisterRequest request)  {
+
+        if(repository.existsByUsername(request.getUsername())){
+            Optional<User> userOptional = repository.findByUsername(request.getUsername());
+
+            if (userOptional.isPresent() && userOptional.get().getVerified()) {
+                return ResponseMessage.builder()
+                        .message("Username already exists")
+                        .build();
+            }
+
+        }
+
+        if(repository.existsByEmail(request.getEmail())){
+            Optional<User> userOptional = repository.findByUsername(request.getUsername());
+
+            if (userOptional.isPresent() && userOptional.get().getVerified()) {
+                return ResponseMessage.builder()
+                        .message("Email already exists")
+                        .build();
+            }
+        }
+        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
+            return ResponseMessage.builder()
+                    .message("Username must be less than 15 characters and greater than 5")
+                    .build();
+        }
+        if (request.getUsername().contains(" ")) {
+            return ResponseMessage.builder()
+                    .message("Username must not contain spaces")
+                    .build();
+        }
+        if(request.getFirstName().isEmpty()){
+            return ResponseMessage.builder()
+                    .message("First name is required")
+                    .build();
+        }
+        if(request.getFirstName().length()>20){
+            return ResponseMessage.builder()
+                    .message("First name can not be longer than 20 characters")
+                    .build();
+        }
+        if(request.getLastName().length()>20){
+            return ResponseMessage.builder()
+                    .message("Last name can not be longer than 20 characters")
+                    .build();
+        }
+
+        if(request.getEmail()==null && request.getMobile().isEmpty()){
+            return ResponseMessage.builder()
+                    .message("Either Email or Mobile number is required")
+                    .build();
+        }
+
+        String password = request.getPassword();
+        if (password.length() < 8 || password.length()>20) {
+            return ResponseMessage.builder()
+                    .message("Password must greater than 8 characters and less than 20 characters")
+                    .build();
+        }
+        if (!password.matches(".*[A-Z].*")) {
+            return ResponseMessage.builder()
+                    .message("Password must contain at least one uppercase letter")
+                    .build();
+        }
+        if (!password.matches(".*[a-z].*")) {
+            return ResponseMessage.builder()
+                    .message("Password must contain at least one lowercase letter")
+                    .build();
+        }
+        if (!password.matches(".*\\d.*")) {
+            return ResponseMessage.builder()
+                    .message("Password must contain at least one digit")
+                    .build();
+        }
+        if (!password.matches(".*[!@#$%^&*()\\-_=+{};:,<.>].*")) {
+            return ResponseMessage.builder()
+                    .message("Password must contain at least one special character")
+                    .build();
+        }
+        if (password.contains(" ")) {
+            return ResponseMessage.builder()
+                    .message("Password must not contain spaces")
+                    .build();
+        }
+        Role role = request.getRole() != null ? request.getRole() : Role.CANDIDATE;
+
         var user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
@@ -27,28 +120,43 @@ public class AuthService {
                 .username(request.getUsername())
                 .mobile(request.getMobile())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.CANDIDATE)
+                .role(role)
+                .verified(false)
                 .build();
 
 
         String otp= generateotp();
         user.setOtp(otp);
+        user.setOtpGenerated(LocalDateTime.now());
         repository.save(user);
-        sendVerificationEmail(user.getEmail(),otp);
+        if(user.getEmail()!=null){
+           return sendVerificationEmail(user.getEmail(), otp);
+        }
+        else{
+           return twilioService.sendOtp(request.getMobile(), otp);
 
-        return ("OTP sent to "+user.getEmail());
+        }
 
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
+            return  AuthenticationResponse.builder()
+                    .token(null)
+                    .message("Username must be less than 15 characters and greater than 5")
+                    .build();
+        }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
                         request.getPassword()));
         var user=repository.findByUsername(request.getUsername()).orElseThrow();
+        user.setVerified(true);
+        repository.save(user);
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .message("Token Generated Successfully")
                 .build();
     }
     private String generateotp(){
@@ -56,10 +164,13 @@ public class AuthService {
        int otpvalue= 100000+random.nextInt(900000);
        return String.valueOf(otpvalue);
     }
-    private void sendVerificationEmail(String Email,String otp) throws MessagingException {
-        String subject="Verification mail";
-        String body="Your verification code is "+otp;
-        emailService.sendEmail(Email,subject,body);
+    public ResponseMessage sendVerificationEmail(String email, String otp) {
+        String subject = "Verification Mail";
+        String body = "Your verification code is " + otp;
+
+        return emailService.sendEmail(email, subject, body);
+        // Return success response if email is sent successfully
+
     }
     public AuthenticationResponse generateToken(User user) {
         var jwtToken = jwtService.generateToken(user);
@@ -69,36 +180,115 @@ public class AuthService {
     }
 
     public AuthenticationResponse validate(OtpValidate request) {
+        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
+            return  AuthenticationResponse.builder()
+                    .message("Username must be less than 15 characters and greater than 5")
+                    .build();
+        }
+        if(repository.existsByUsername(request.getUsername())){
+            Optional<User> userOptional = repository.findByUsername(request.getUsername());
+
+            if (userOptional.isPresent() && userOptional.get().getVerified()) {
+                return AuthenticationResponse.builder()
+                        .message("Username already exists")
+                        .build();
+            }
+
+        }
+
         var user=repository.findByUsername(request.getUsername()).orElseThrow();
-        if(user.getOtp().equals(request.getOtp())){
+        long minuteElapsed = ChronoUnit.MINUTES.between(user.getOtpGenerated(), LocalDateTime.now());
+        if(user.getOtp().equals(request.getOtp()) && minuteElapsed < 5){
+            user.setVerified(true);
+            repository.save(user);
             var jwtToken = jwtService.generateToken(user);
             return AuthenticationResponse.builder()
                     .token(jwtToken)
                     .build();
         }else {
-            throw new RuntimeException("Invalid OTP provided.");
+            return AuthenticationResponse.builder()
+                    .message("invalid OTP")
+                    .build();
         }
 
     }
 
-    public String forgotPassword(String username) throws MessagingException {
+    public ResponseMessage forgotPassword(String username)  {
+        if (username.length() >= 15 || username.length() < 5) {
+            return ResponseMessage.builder()
+                    .message("Username should be greater than 5 characters and less than 15")
+                    .build();
+        }
         var user = repository.findByUsername(username).orElseThrow();
         String otp= generateotp();
         user.setOtp(otp);
         repository.save(user);
-        sendVerificationEmail(user.getEmail(),otp);
-        return ("OTP sent to "+user.getEmail());
+        if(user.getEmail()!=null){
+            return sendVerificationEmail(user.getEmail(), otp);
+        }
+        else{
+            return twilioService.sendOtp(user.getMobile(), otp);
+
+        }
     }
 
-    public String verifyForgotPassword(ValidateForgotPasswordRequest request) {
+    public ResponseMessage verifyForgotPassword(ValidateForgotPasswordRequest request) {
+        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
+            return ResponseMessage.builder()
+                    .message("Username must be less than 15 characters and greater than 5")
+                    .build();
+        }
+        String password = request.getNewPassword();
+        if (password.length() < 8 || password.length()>20) {
+            return ResponseMessage.builder()
+                    .message("Password must greater than 8 characters and less than 20 characters")
+                    .build();
+        }
+        if (!password.matches(".*[A-Z].*")) {
+            return ResponseMessage.builder()
+                    .message("Password must contain at least one uppercase letter")
+                    .build();
+        }
+        if (!password.matches(".*[a-z].*")) {
+            return ResponseMessage.builder()
+                    .message("Password must contain at least one lowercase letter")
+                    .build();
+        }
+        if (!password.matches(".*\\d.*")) {
+            return ResponseMessage.builder()
+                    .message("Password must contain at least one digit")
+                    .build();
+        }
+        if (!password.matches(".*[!@#$%^&*()\\-_=+{};:,<.>].*")) {
+            return ResponseMessage.builder()
+                    .message("Password must contain at least one special character")
+                    .build();
+        }
+        if (password.contains(" ")) {
+            return ResponseMessage.builder()
+                    .message("Password must not contain spaces")
+                    .build();
+        }
+
         var user=repository.findByUsername(request.getUsername()).orElseThrow();
         if(user.getOtp().equals(request.getOtp()) && request.getNewPassword().equals(request.getConfirmPassword()) ){
             user.setPassword(passwordEncoder.encode(request.getNewPassword()));
             repository.save(user);
-            return ("Password changed successfully");
+            return ResponseMessage.builder()
+                    .message("Password changed successfully")
+                    .build();
         }
         else {
-            throw new RuntimeException("Invalid OTP provided.");
+            if(!user.getOtp().equals(request.getOtp()))
+            {return ResponseMessage.builder()
+                        .message("OTP invalid")
+                        .build();
+                }
+            else{
+                return ResponseMessage.builder()
+                        .message("Confirm Password not same as New password")
+                        .build();
+            }
         }
     }
 }
