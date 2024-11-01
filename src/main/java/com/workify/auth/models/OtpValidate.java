@@ -7,6 +7,6 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OtpValidate {
-    private String username;
+    private String contact;
     private String otp;
 }

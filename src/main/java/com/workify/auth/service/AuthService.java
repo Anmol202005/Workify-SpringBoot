@@ -29,16 +29,16 @@ public class AuthService {
     private final TwilioService twilioService;
     public ResponseMessage register(RegisterRequest request)  {
 
-        if(repository.existsByUsername(request.getUsername())){
-            Optional<User> userOptional = repository.findByUsernameAndVerified(request.getUsername() , true);
-
-            if (userOptional.isPresent() && userOptional.get().getVerified()) {
-                return ResponseMessage.builder()
-                        .message("Username already exists")
-                        .build();
-            }
-
-        }
+//        if(repository.existsByUsername(request.getUsername())){
+//            Optional<User> userOptional = repository.findByUsernameAndVerified(request.getUsername() , true);
+//
+//            if (userOptional.isPresent() && userOptional.get().getVerified()) {
+//                return ResponseMessage.builder()
+//                        .message("Username already exists")
+//                        .build();
+//            }
+//
+//        }
 
         if(repository.existsByEmail(request.getEmail()) && request.getEmail()!=null && !request.getEmail().isEmpty()){
             Optional<User> userOptional = repository.findByEmailAndVerified(request.getEmail() , true);
@@ -59,16 +59,16 @@ public class AuthService {
             }
         }
 
-        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
-            return ResponseMessage.builder()
-                    .message("Username must be less than 15 characters and greater than 5")
-                    .build();
-        }
-        if (request.getUsername().contains(" ")) {
-            return ResponseMessage.builder()
-                    .message("Username must not contain spaces")
-                    .build();
-        }
+//        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
+//            return ResponseMessage.builder()
+//                    .message("Username must be less than 15 characters and greater than 5")
+//                    .build();
+//        }
+//        if (request.getUsername().contains(" ")) {
+//            return ResponseMessage.builder()
+//                    .message("Username must not contain spaces")
+//                    .build();
+//        }
         if(request.getFirstName().isEmpty()){
             return ResponseMessage.builder()
                     .message("First name is required")
@@ -123,12 +123,13 @@ public class AuthService {
                     .build();
         }
         Role role = request.getRole() != null ? request.getRole() : Role.CANDIDATE;
+        String contact=request.getEmail()!=null ? request.getEmail() : request.getMobile();
 
         var user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
-                .username(request.getUsername())
+                .username(contact)
                 .mobile(request.getMobile())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(role)
@@ -151,16 +152,16 @@ public class AuthService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
-            return  AuthenticationResponse.builder()
-                    .token(null)
-                    .message("Username must be less than 15 characters and greater than 5")
-                    .build();
-        }
+//        if (request.getUs().length() >= 15 || request.getUsername().length() < 5) {
+//            return  AuthenticationResponse.builder()
+//                    .token(null)
+//                    .message("Username must be less than 15 characters and greater than 5")
+//                    .build();
+//        }
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            request.getUsername(),
+                            request.getContact(),
                             request.getPassword()));
         } catch (BadCredentialsException e) {
             return AuthenticationResponse.builder()
@@ -168,7 +169,7 @@ public class AuthService {
                     .build();
         }
 
-        var user = repository.findByUsername(request.getUsername()).orElseThrow();
+        var user = repository.findByUsername(request.getContact()).orElseThrow();
         user.setVerified(true);
         repository.save(user);
 
@@ -200,23 +201,25 @@ public class AuthService {
     }
 
     public AuthenticationResponse validate(OtpValidate request) {
-        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
-            return  AuthenticationResponse.builder()
-                    .message("Username must be less than 15 characters and greater than 5")
-                    .build();
-        }
-        if(repository.existsByUsername(request.getUsername())){
-            Optional<User> userOptional = repository.findByUsername(request.getUsername());
-
-            if (userOptional.isPresent() && userOptional.get().getVerified()) {
-                return AuthenticationResponse.builder()
-                        .message("Username already exists")
-                        .build();
-            }
-
-        }
-
-        var user=repository.findByUsername(request.getUsername()).orElseThrow();
+//        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
+//            return  AuthenticationResponse.builder()
+//                    .message("Username must be less than 15 characters and greater than 5")
+//                    .build();
+//        }
+//        if(repository.existsByUsername(request.getUsername())){
+//            Optional<User> userOptional = repository.findByUsername(request.getUsername());
+//
+//            if (userOptional.isPresent() && userOptional.get().getVerified()) {
+//                return AuthenticationResponse.builder()
+//                        .message("Username already exists")
+//                        .build();
+//            }
+//
+//        }
+        if(!repository.existsByUsername(request.getContact())){return AuthenticationResponse.builder()
+                .message("Invalid Username")
+                .build();}
+        var user=repository.findByUsername(request.getContact()).orElseThrow();
         long minuteElapsed = ChronoUnit.MINUTES.between(user.getOtpGenerated(), LocalDateTime.now());
         if(user.getOtp().equals(request.getOtp()) && minuteElapsed < 5){
             user.setVerified(true);
@@ -234,13 +237,13 @@ public class AuthService {
 
     }
 
-    public ResponseMessage forgotPassword(String username)  {
-        if (username.length() >= 15 || username.length() < 5) {
-            return ResponseMessage.builder()
-                    .message("Username should be greater than 5 characters and less than 15")
-                    .build();
-        }
-        var user = repository.findByUsername(username).orElseThrow();
+    public ResponseMessage forgotPassword(String contact)  {
+//        if (username.length() >= 15 || username.length() < 5) {
+//            return ResponseMessage.builder()
+//                    .message("Username should be greater than 5 characters and less than 15")
+//                    .build();
+//        }
+        var user = repository.findByUsername(contact).orElseThrow();
         String otp= generateotp();
         user.setOtp(otp);
         user.setOtpGenerated(LocalDateTime.now());
@@ -255,11 +258,11 @@ public class AuthService {
     }
 
     public ResponseMessage verifyForgotPassword(ValidateForgotPasswordRequest request) {
-        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
-            return ResponseMessage.builder()
-                    .message("Username must be less than 15 characters and greater than 5")
-                    .build();
-        }
+//        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
+//            return ResponseMessage.builder()
+//                    .message("Username must be less than 15 characters and greater than 5")
+//                    .build();
+//        }
         String password = request.getNewPassword();
         if (password.length() < 8 || password.length()>20) {
             return ResponseMessage.builder()

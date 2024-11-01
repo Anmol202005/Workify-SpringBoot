@@ -15,7 +15,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<ResponseMessage> register(
             @RequestBody RegisterRequest request
-    ) throws MessagingException {
+    )  {
         return ResponseEntity.ok(service.register(request));
 
     }
@@ -35,7 +35,7 @@ public class AuthController {
     public ResponseEntity<ResponseMessage> forgotPassword(
             @RequestBody ForgotPasswordRequest request
     ) throws MessagingException {
-        return ResponseEntity.ok(service.forgotPassword(request.getUsername()));
+        return ResponseEntity.ok(service.forgotPassword(request.getContact()));
     }
     @PutMapping("/verify-otp")
     public ResponseEntity<ResponseMessage> verify(

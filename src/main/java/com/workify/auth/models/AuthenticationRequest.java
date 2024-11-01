@@ -8,6 +8,6 @@ import org.antlr.v4.runtime.misc.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthenticationRequest {
-    private String username;
+    private String contact;
     private String password;
 }
