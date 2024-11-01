@@ -30,7 +30,7 @@ public class AuthService {
     public ResponseMessage register(RegisterRequest request)  {
 
         if(repository.existsByUsername(request.getUsername())){
-            Optional<User> userOptional = repository.findByUsername(request.getUsername());
+            Optional<User> userOptional = repository.findByUsernameAndVerified(request.getUsername() , true);
 
             if (userOptional.isPresent() && userOptional.get().getVerified()) {
                 return ResponseMessage.builder()
@@ -40,8 +40,8 @@ public class AuthService {
 
         }
 
-        if(repository.existsByEmail(request.getEmail())){
-            Optional<User> userOptional = repository.findByEmail(request.getEmail());
+        if(repository.existsByEmail(request.getEmail()) && request.getEmail()!=null && !request.getEmail().isEmpty()){
+            Optional<User> userOptional = repository.findByEmailAndVerified(request.getEmail() , true);
 
             if (userOptional.isPresent() && userOptional.get().getVerified()) {
                 return ResponseMessage.builder()
@@ -49,6 +49,16 @@ public class AuthService {
                         .build();
             }
         }
+        if(repository.existsByMobile(request.getMobile()) && request.getMobile()!=null && !request.getMobile().isEmpty()){
+            Optional<User> userOptional = repository.findByMobileAndVerified(request.getMobile(),true);
+
+            if (userOptional.isPresent() && userOptional.get().getVerified()) {
+                return ResponseMessage.builder()
+                        .message("Mobile already exists")
+                        .build();
+            }
+        }
+
         if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
             return ResponseMessage.builder()
                     .message("Username must be less than 15 characters and greater than 5")
@@ -233,6 +243,7 @@ public class AuthService {
         var user = repository.findByUsername(username).orElseThrow();
         String otp= generateotp();
         user.setOtp(otp);
+        user.setOtpGenerated(LocalDateTime.now());
         repository.save(user);
         if(user.getEmail()!=null){
             return sendVerificationEmail(user.getEmail(), otp);
@@ -282,7 +293,8 @@ public class AuthService {
         }
 
         var user=repository.findByUsername(request.getUsername()).orElseThrow();
-        if(user.getOtp().equals(request.getOtp()) && request.getNewPassword().equals(request.getConfirmPassword()) ){
+        long minuteElapsed = ChronoUnit.MINUTES.between(user.getOtpGenerated(), LocalDateTime.now());
+        if(user.getOtp().equals(request.getOtp()) && request.getNewPassword().equals(request.getConfirmPassword()) && minuteElapsed < 5 ){
             user.setPassword(passwordEncoder.encode(request.getNewPassword()));
             repository.save(user);
             return ResponseMessage.builder()
