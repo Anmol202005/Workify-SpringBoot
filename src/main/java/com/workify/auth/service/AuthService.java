@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,7 @@ public class AuthService {
         }
 
         if(repository.existsByEmail(request.getEmail())){
-            Optional<User> userOptional = repository.findByUsername(request.getUsername());
+            Optional<User> userOptional = repository.findByEmail(request.getEmail());
 
             if (userOptional.isPresent() && userOptional.get().getVerified()) {
                 return ResponseMessage.builder()
@@ -146,18 +147,27 @@ public class AuthService {
                     .message("Username must be less than 15 characters and greater than 5")
                     .build();
         }
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()));
-        var user=repository.findByUsername(request.getUsername()).orElseThrow();
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()));
+        } catch (BadCredentialsException e) {
+            return AuthenticationResponse.builder()
+                    .message("Incorrect username or password")
+                    .build();
+        }
+
+        var user = repository.findByUsername(request.getUsername()).orElseThrow();
         user.setVerified(true);
         repository.save(user);
+
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
-                .message("Token Generated Successfully")
+                .message("Login successful")
                 .build();
+
     }
     private String generateotp(){
         Random random=new Random();
@@ -203,6 +213,7 @@ public class AuthService {
             repository.save(user);
             var jwtToken = jwtService.generateToken(user);
             return AuthenticationResponse.builder()
+                    .message("Account has been registered successfully")
                     .token(jwtToken)
                     .build();
         }else {
