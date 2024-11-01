@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class AuthService {
     public ResponseMessage register(RegisterRequest request)  {
 
         if(repository.existsByUsername(request.getUsername())){
-            Optional<User> userOptional = repository.findByUsername(request.getUsername());
+            Optional<User> userOptional = repository.findByUsernameAndVerified(request.getUsername() , true);
 
             if (userOptional.isPresent() && userOptional.get().getVerified()) {
                 return ResponseMessage.builder()
@@ -39,8 +40,8 @@ public class AuthService {
 
         }
 
-        if(repository.existsByEmail(request.getEmail())){
-            Optional<User> userOptional = repository.findByUsername(request.getUsername());
+        if(repository.existsByEmail(request.getEmail()) && request.getEmail()!=null && !request.getEmail().isEmpty()){
+            Optional<User> userOptional = repository.findByEmailAndVerified(request.getEmail() , true);
 
             if (userOptional.isPresent() && userOptional.get().getVerified()) {
                 return ResponseMessage.builder()
@@ -48,6 +49,16 @@ public class AuthService {
                         .build();
             }
         }
+        if(repository.existsByMobile(request.getMobile()) && request.getMobile()!=null && !request.getMobile().isEmpty()){
+            Optional<User> userOptional = repository.findByMobileAndVerified(request.getMobile(),true);
+
+            if (userOptional.isPresent() && userOptional.get().getVerified()) {
+                return ResponseMessage.builder()
+                        .message("Mobile already exists")
+                        .build();
+            }
+        }
+
         if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
             return ResponseMessage.builder()
                     .message("Username must be less than 15 characters and greater than 5")
@@ -146,18 +157,27 @@ public class AuthService {
                     .message("Username must be less than 15 characters and greater than 5")
                     .build();
         }
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()));
-        var user=repository.findByUsername(request.getUsername()).orElseThrow();
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()));
+        } catch (BadCredentialsException e) {
+            return AuthenticationResponse.builder()
+                    .message("Incorrect username or password")
+                    .build();
+        }
+
+        var user = repository.findByUsername(request.getUsername()).orElseThrow();
         user.setVerified(true);
         repository.save(user);
+
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
-                .message("Token Generated Successfully")
+                .message("Login successful")
                 .build();
+
     }
     private String generateotp(){
         Random random=new Random();
@@ -203,6 +223,7 @@ public class AuthService {
             repository.save(user);
             var jwtToken = jwtService.generateToken(user);
             return AuthenticationResponse.builder()
+                    .message("Account has been registered successfully")
                     .token(jwtToken)
                     .build();
         }else {
@@ -222,6 +243,7 @@ public class AuthService {
         var user = repository.findByUsername(username).orElseThrow();
         String otp= generateotp();
         user.setOtp(otp);
+        user.setOtpGenerated(LocalDateTime.now());
         repository.save(user);
         if(user.getEmail()!=null){
             return sendVerificationEmail(user.getEmail(), otp);
@@ -271,7 +293,8 @@ public class AuthService {
         }
 
         var user=repository.findByUsername(request.getUsername()).orElseThrow();
-        if(user.getOtp().equals(request.getOtp()) && request.getNewPassword().equals(request.getConfirmPassword()) ){
+        long minuteElapsed = ChronoUnit.MINUTES.between(user.getOtpGenerated(), LocalDateTime.now());
+        if(user.getOtp().equals(request.getOtp()) && request.getNewPassword().equals(request.getConfirmPassword()) && minuteElapsed < 5 ){
             user.setPassword(passwordEncoder.encode(request.getNewPassword()));
             repository.save(user);
             return ResponseMessage.builder()
