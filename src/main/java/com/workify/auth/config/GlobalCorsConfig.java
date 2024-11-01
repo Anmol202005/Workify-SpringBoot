@@ -12,10 +12,10 @@ public class GlobalCorsConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin("https://workify-eight.vercel.app/"); // Replace with allowed origin
+        config.addAllowedOrigin("*"); // Replace with allowed origin
         config.addAllowedMethod("*"); // Allows all HTTP methods
         config.addAllowedHeader("*"); // Allows all headers
-        config.setAllowCredentials(true); // Allows cookies
+        config.setAllowCredentials(false); // Allows cookies
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
