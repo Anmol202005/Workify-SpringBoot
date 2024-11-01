@@ -35,7 +35,8 @@ public class TwilioService {
         ).create();
            return ResponseMessage.builder()
                    .message("OTP sent successfully to "+ toPhoneNumber )
-                   .build();} catch (Exception e){
+                   .build();}
+       catch (Exception e){
            System.err.println("An unexpected error occurred: " + e.getMessage());
            return ResponseMessage.builder()
                    .message("Incorrect mobile number or bad network" )
