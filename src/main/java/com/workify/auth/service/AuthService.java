@@ -243,6 +243,11 @@ public class AuthService {
 //                    .message("Username should be greater than 5 characters and less than 15")
 //                    .build();
 //        }
+        if(!repository.existsByUsername(contact)){
+            return ResponseMessage.builder()
+                    .message("Contact not registered")
+                    .build();
+        }
         var user = repository.findByUsername(contact).orElseThrow();
         String otp= generateotp();
         user.setOtp(otp);
