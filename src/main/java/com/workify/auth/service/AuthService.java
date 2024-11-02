@@ -124,8 +124,28 @@ public class AuthService {
         }
         Role role = request.getRole() != null ? request.getRole() : Role.CANDIDATE;
         String contact=request.getEmail()!=null ? request.getEmail() : request.getMobile();
+        if(repository.existsByUsernameAndVerified(contact,false)){
+            var user=repository.findByUsername(contact).orElseThrow();
+            user.setFirstName(request.getFirstName());
+            user.setLastName(request.getLastName());
+            user.setEmail(request.getEmail());
+            user.setMobile(request.getMobile());
+            user.setPassword(passwordEncoder.encode(password));
+            user.setRole(role);
+            user.setVerified(false);
+            String otp= generateotp();
+            user.setOtp(otp);
+            user.setOtpGenerated(LocalDateTime.now());
+            repository.save(user);
+            if(user.getEmail()!=null){
+                return sendVerificationEmail(user.getEmail(), otp);
+            }
+            else{
+                return twilioService.sendOtp(request.getMobile(), otp);
 
-        var user = User.builder()
+            }
+        }
+        else{var user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
@@ -147,7 +167,7 @@ public class AuthService {
         else{
            return twilioService.sendOtp(request.getMobile(), otp);
 
-        }
+        }}
 
     }
 
