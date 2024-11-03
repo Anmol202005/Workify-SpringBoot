@@ -138,10 +138,10 @@ public class AuthService {
             user.setOtpGenerated(LocalDateTime.now());
             repository.save(user);
             if(user.getEmail()!=null){
-                return ResponseEntity.ok(sendVerificationEmail(user.getEmail(), otp));
+                return (sendVerificationEmail(user.getEmail(), otp));
             }
             else{
-                return ResponseEntity.ok(twilioService.sendOtp(request.getMobile(), otp));
+                return (twilioService.sendOtp(request.getMobile(), otp));
 
             }
         }
@@ -162,10 +162,10 @@ public class AuthService {
         user.setOtpGenerated(LocalDateTime.now());
         repository.save(user);
         if(user.getEmail()!=null){
-            return ResponseEntity.ok(sendVerificationEmail(user.getEmail(), otp));
+            return (sendVerificationEmail(user.getEmail(), otp));
         }
         else{
-            return ResponseEntity.ok(twilioService.sendOtp(request.getMobile(), otp));
+            return (twilioService.sendOtp(request.getMobile(), otp));
 
         }}
 
@@ -205,7 +205,7 @@ public class AuthService {
        int otpvalue= 100000+random.nextInt(900000);
        return String.valueOf(otpvalue);
     }
-    public ResponseMessage sendVerificationEmail(String email, String otp) {
+    public ResponseEntity sendVerificationEmail(String email, String otp) {
         String subject = "Verification Mail";
         String body = "Your verification code is " + otp;
 
@@ -274,10 +274,10 @@ public class AuthService {
         user.setOtpGenerated(LocalDateTime.now());
         repository.save(user);
         if(user.getEmail()!=null){
-            return ResponseEntity.ok(sendVerificationEmail(user.getEmail(), otp));
+            return (sendVerificationEmail(user.getEmail(), otp));
         }
         else{
-            return ResponseEntity.ok(twilioService.sendOtp(user.getMobile(), otp));
+            return (twilioService.sendOtp(user.getMobile(), otp));
 
         }
     }

@@ -4,6 +4,8 @@ import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.workify.auth.models.ResponseMessage;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -25,7 +27,7 @@ public class TwilioService {
         Twilio.init(accountSid, authToken);
     }
 
-    public ResponseMessage sendOtp(String toPhoneNumber, String otp) {
+    public ResponseEntity sendOtp(String toPhoneNumber, String otp) {
         String messageBody = "Your OTP code is: " + otp;
 
        try{ Message message = Message.creator(
@@ -33,14 +35,14 @@ public class TwilioService {
                 new com.twilio.type.PhoneNumber(fromPhoneNumber),
                 messageBody
         ).create();
-           return ResponseMessage.builder()
+           return ResponseEntity.ok(ResponseMessage.builder()
                    .message("OTP sent successfully to "+ toPhoneNumber )
-                   .build();}
+                   .build());}
        catch (Exception e){
            System.err.println("An unexpected error occurred: " + e.getMessage());
-           return ResponseMessage.builder()
+           return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                    .message("Incorrect mobile number or bad network" )
-                   .build();}
+                   .build());}
        }
     }
 
