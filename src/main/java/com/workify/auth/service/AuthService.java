@@ -79,11 +79,12 @@ public class AuthService {
                     .message("First name can not be longer than 20 characters")
                     .build());
         }
+        if(request.getLastName()!=null){
         if(request.getLastName().length()>20){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Last name can not be longer than 20 characters")
                     .build());
-        }
+        }}
 
         if(request.getEmail()==null && request.getMobile().isEmpty()){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
@@ -210,7 +211,7 @@ public class AuthService {
         String body = "Your verification code is " + otp;
 
         return emailService.sendEmail(email, subject, body);
-        // Return success response if email is sent successfully
+
 
     }
     public AuthenticationResponse generateToken(User user) {
