@@ -6,7 +6,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ValidateForgotPasswordRequest {
-    private String username;
+    private String contact;
     private String otp;
     private String newPassword;
     private String confirmPassword;

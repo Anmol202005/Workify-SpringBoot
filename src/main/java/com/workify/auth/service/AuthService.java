@@ -27,7 +27,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
     private final TwilioService twilioService;
-    public ResponseMessage register(RegisterRequest request)  {
+    public ResponseEntity register(RegisterRequest request)  {
 
 //        if(repository.existsByUsername(request.getUsername())){
 //            Optional<User> userOptional = repository.findByUsernameAndVerified(request.getUsername() , true);
@@ -44,18 +44,18 @@ public class AuthService {
             Optional<User> userOptional = repository.findByEmailAndVerified(request.getEmail() , true);
 
             if (userOptional.isPresent() && userOptional.get().getVerified()) {
-                return ResponseMessage.builder()
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                         .message("Email already exists")
-                        .build();
+                        .build());
             }
         }
         if(repository.existsByMobile(request.getMobile()) && request.getMobile()!=null && !request.getMobile().isEmpty()){
             Optional<User> userOptional = repository.findByMobileAndVerified(request.getMobile(),true);
 
             if (userOptional.isPresent() && userOptional.get().getVerified()) {
-                return ResponseMessage.builder()
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                         .message("Mobile already exists")
-                        .build();
+                        .build());
             }
         }
 
@@ -70,57 +70,57 @@ public class AuthService {
 //                    .build();
 //        }
         if(request.getFirstName().isEmpty()){
-            return ResponseMessage.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("First name is required")
-                    .build();
+                    .build());
         }
         if(request.getFirstName().length()>20){
-            return ResponseMessage.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("First name can not be longer than 20 characters")
-                    .build();
+                    .build());
         }
         if(request.getLastName().length()>20){
-            return ResponseMessage.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Last name can not be longer than 20 characters")
-                    .build();
+                    .build());
         }
 
         if(request.getEmail()==null && request.getMobile().isEmpty()){
-            return ResponseMessage.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Either Email or Mobile number is required")
-                    .build();
+                    .build());
         }
 
         String password = request.getPassword();
         if (password.length() < 8 || password.length()>20) {
-            return ResponseMessage.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Password must greater than 8 characters and less than 20 characters")
-                    .build();
+                    .build());
         }
         if (!password.matches(".*[A-Z].*")) {
-            return ResponseMessage.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Password must contain at least one uppercase letter")
-                    .build();
+                    .build());
         }
         if (!password.matches(".*[a-z].*")) {
-            return ResponseMessage.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Password must contain at least one lowercase letter")
-                    .build();
+                    .build());
         }
         if (!password.matches(".*\\d.*")) {
-            return ResponseMessage.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Password must contain at least one digit")
-                    .build();
+                    .build());
         }
         if (!password.matches(".*[!@#$%^&*()\\-_=+{};:,<.>].*")) {
-            return ResponseMessage.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Password must contain at least one special character")
-                    .build();
+                    .build());
         }
         if (password.contains(" ")) {
-            return ResponseMessage.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Password must not contain spaces")
-                    .build();
+                    .build());
         }
         Role role = request.getRole() != null ? request.getRole() : Role.CANDIDATE;
         String contact=request.getEmail()!=null ? request.getEmail() : request.getMobile();
@@ -138,10 +138,10 @@ public class AuthService {
             user.setOtpGenerated(LocalDateTime.now());
             repository.save(user);
             if(user.getEmail()!=null){
-                return sendVerificationEmail(user.getEmail(), otp);
+                return ResponseEntity.ok(sendVerificationEmail(user.getEmail(), otp));
             }
             else{
-                return twilioService.sendOtp(request.getMobile(), otp);
+                return ResponseEntity.ok(twilioService.sendOtp(request.getMobile(), otp));
 
             }
         }
@@ -162,16 +162,16 @@ public class AuthService {
         user.setOtpGenerated(LocalDateTime.now());
         repository.save(user);
         if(user.getEmail()!=null){
-           return sendVerificationEmail(user.getEmail(), otp);
+            return ResponseEntity.ok(sendVerificationEmail(user.getEmail(), otp));
         }
         else{
-           return twilioService.sendOtp(request.getMobile(), otp);
+            return ResponseEntity.ok(twilioService.sendOtp(request.getMobile(), otp));
 
         }}
 
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public ResponseEntity authenticate(AuthenticationRequest request) {
 //        if (request.getUs().length() >= 15 || request.getUsername().length() < 5) {
 //            return  AuthenticationResponse.builder()
 //                    .token(null)
@@ -184,9 +184,9 @@ public class AuthService {
                             request.getContact(),
                             request.getPassword()));
         } catch (BadCredentialsException e) {
-            return AuthenticationResponse.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(AuthenticationResponse.builder()
                     .message("Incorrect username or password")
-                    .build();
+                    .build());
         }
 
         var user = repository.findByUsername(request.getContact()).orElseThrow();
@@ -194,10 +194,10 @@ public class AuthService {
         repository.save(user);
 
         var jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder()
+        return ResponseEntity.ok(AuthenticationResponse.builder()
                 .token(jwtToken)
                 .message("Login successful")
-                .build();
+                .build());
 
     }
     private String generateotp(){
@@ -220,7 +220,7 @@ public class AuthService {
                 .build();
     }
 
-    public AuthenticationResponse validate(OtpValidate request) {
+    public ResponseEntity validate(OtpValidate request) {
 //        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
 //            return  AuthenticationResponse.builder()
 //                    .message("Username must be less than 15 characters and greater than 5")
@@ -236,37 +236,37 @@ public class AuthService {
 //            }
 //
 //        }
-        if(!repository.existsByUsername(request.getContact())){return AuthenticationResponse.builder()
-                .message("Invalid Username")
-                .build();}
+        if(!repository.existsByUsername(request.getContact())){return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(AuthenticationResponse.builder()
+                .message("Invalid Contact")
+                .build());}
         var user=repository.findByUsername(request.getContact()).orElseThrow();
         long minuteElapsed = ChronoUnit.MINUTES.between(user.getOtpGenerated(), LocalDateTime.now());
         if(user.getOtp().equals(request.getOtp()) && minuteElapsed < 5){
             user.setVerified(true);
             repository.save(user);
             var jwtToken = jwtService.generateToken(user);
-            return AuthenticationResponse.builder()
+            return ResponseEntity.ok(AuthenticationResponse.builder()
                     .message("Account has been registered successfully")
                     .token(jwtToken)
-                    .build();
+                    .build());
         }else {
-            return AuthenticationResponse.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(AuthenticationResponse.builder()
                     .message("invalid OTP")
-                    .build();
+                    .build());
         }
 
     }
 
-    public ResponseMessage forgotPassword(String contact)  {
+    public ResponseEntity forgotPassword(String contact)  {
 //        if (username.length() >= 15 || username.length() < 5) {
 //            return ResponseMessage.builder()
 //                    .message("Username should be greater than 5 characters and less than 15")
 //                    .build();
 //        }
         if(!repository.existsByUsername(contact)){
-            return ResponseMessage.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Contact not registered")
-                    .build();
+                    .build());
         }
         var user = repository.findByUsername(contact).orElseThrow();
         String otp= generateotp();
@@ -274,15 +274,15 @@ public class AuthService {
         user.setOtpGenerated(LocalDateTime.now());
         repository.save(user);
         if(user.getEmail()!=null){
-            return sendVerificationEmail(user.getEmail(), otp);
+            return ResponseEntity.ok(sendVerificationEmail(user.getEmail(), otp));
         }
         else{
-            return twilioService.sendOtp(user.getMobile(), otp);
+            return ResponseEntity.ok(twilioService.sendOtp(user.getMobile(), otp));
 
         }
     }
 
-    public ResponseMessage verifyForgotPassword(ValidateForgotPasswordRequest request) {
+    public ResponseEntity verifyForgotPassword(ValidateForgotPasswordRequest request) {
 //        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
 //            return ResponseMessage.builder()
 //                    .message("Username must be less than 15 characters and greater than 5")
@@ -290,55 +290,55 @@ public class AuthService {
 //        }
         String password = request.getNewPassword();
         if (password.length() < 8 || password.length()>20) {
-            return ResponseMessage.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Password must greater than 8 characters and less than 20 characters")
-                    .build();
+                    .build());
         }
         if (!password.matches(".*[A-Z].*")) {
-            return ResponseMessage.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Password must contain at least one uppercase letter")
-                    .build();
+                    .build());
         }
         if (!password.matches(".*[a-z].*")) {
-            return ResponseMessage.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Password must contain at least one lowercase letter")
-                    .build();
+                    .build());
         }
         if (!password.matches(".*\\d.*")) {
-            return ResponseMessage.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Password must contain at least one digit")
-                    .build();
+                    .build());
         }
         if (!password.matches(".*[!@#$%^&*()\\-_=+{};:,<.>].*")) {
-            return ResponseMessage.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Password must contain at least one special character")
-                    .build();
+                    .build());
         }
         if (password.contains(" ")) {
-            return ResponseMessage.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Password must not contain spaces")
-                    .build();
+                    .build());
         }
 
-        var user=repository.findByUsername(request.getUsername()).orElseThrow();
+        var user=repository.findByUsername(request.getContact()).orElseThrow();
         long minuteElapsed = ChronoUnit.MINUTES.between(user.getOtpGenerated(), LocalDateTime.now());
         if(user.getOtp().equals(request.getOtp()) && request.getNewPassword().equals(request.getConfirmPassword()) && minuteElapsed < 5 ){
             user.setPassword(passwordEncoder.encode(request.getNewPassword()));
             repository.save(user);
-            return ResponseMessage.builder()
+            return ResponseEntity.ok(ResponseMessage.builder()
                     .message("Password changed successfully")
-                    .build();
+                    .build());
         }
         else {
-            if(!user.getOtp().equals(request.getOtp()))
-            {return ResponseMessage.builder()
+            if(!user.getOtp().equals(request.getOtp()) || minuteElapsed >5  )
+            {return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                         .message("OTP invalid")
-                        .build();
+                        .build());
                 }
             else{
-                return ResponseMessage.builder()
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                         .message("Confirm Password not same as New password")
-                        .build();
+                        .build());
             }
         }
     }

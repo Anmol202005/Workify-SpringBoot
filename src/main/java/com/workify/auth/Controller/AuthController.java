@@ -16,31 +16,31 @@ public class AuthController {
     public ResponseEntity<ResponseMessage> register(
             @RequestBody RegisterRequest request
     )  {
-        return ResponseEntity.ok(service.register(request));
+        return service.register(request);
 
     }
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(
             @RequestBody AuthenticationRequest request
     ){
-        return ResponseEntity.ok(service.authenticate(request));
+        return service.authenticate(request);
     }
     @PostMapping("/validate")
     public ResponseEntity<AuthenticationResponse> validate(
             @RequestBody OtpValidate request
     ){
-        return ResponseEntity.ok(service.validate(request));
+        return service.validate(request);
     }
     @PostMapping("/forgot-password")
     public ResponseEntity<ResponseMessage> forgotPassword(
             @RequestBody ForgotPasswordRequest request
     ) throws MessagingException {
-        return ResponseEntity.ok(service.forgotPassword(request.getContact()));
+        return service.forgotPassword(request.getContact());
     }
     @PutMapping("/verify-otp")
     public ResponseEntity<ResponseMessage> verify(
             @RequestBody ValidateForgotPasswordRequest otp
     ){
-        return ResponseEntity.ok(service.verifyForgotPassword(otp));
+        return service.verifyForgotPassword(otp);
     }
 }
