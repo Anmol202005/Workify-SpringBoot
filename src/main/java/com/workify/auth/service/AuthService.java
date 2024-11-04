@@ -211,9 +211,14 @@ public class AuthService {
     }
     public ResponseEntity sendVerificationEmail(String email, String otp) {
         String subject = "Verification Mail";
-        String body = "Your verification code is " + otp;
+        String imageUrl = "https://i.ibb.co/kJkpyt6/Workify.png";
+        String body = "<html><body>" +
+                "<img src='" + imageUrl + "' alt='Verification Image' style='max-width:100%;height:auto;'>" +
+                "<p>Your verification code is <strong>" + otp + "</strong></p>" +
+                "</body></html>";
 
-        return emailService.sendEmail(email, subject, body);
+        // Set the content type to HTML
+        return emailService.sendEmail(email, subject, body, true);
 
 
     }

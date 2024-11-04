@@ -15,14 +15,14 @@ public class EmailService {
     public EmailService(JavaMailSender mailSender){
         this.mailSender=mailSender;
     }
-    public ResponseEntity sendEmail(String to, String subject, String body) {
+    public ResponseEntity sendEmail(String to, String subject, String body,Boolean ishtml) {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper;
         try {
             helper = new MimeMessageHelper(message, true);
             helper.setTo(to);
             helper.setSubject(subject);
-            helper.setText(body);
+            helper.setText(body,ishtml);
             mailSender.send(message);
             // Return a successful response if email is sent
 
