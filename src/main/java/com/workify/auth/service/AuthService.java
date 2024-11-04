@@ -179,6 +179,9 @@ public class AuthService {
 //                    .message("Username must be less than 15 characters and greater than 5")
 //                    .build();
 //        }
+        if(!repository.existsByUsername(request.getContact())){ return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(AuthenticationResponse.builder()
+                .message("User does not exist")
+                .build());}
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -186,7 +189,7 @@ public class AuthService {
                             request.getPassword()));
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(AuthenticationResponse.builder()
-                    .message("Incorrect username or password")
+                    .message("Incorrect password")
                     .build());
         }
 

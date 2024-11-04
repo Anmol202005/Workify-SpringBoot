@@ -41,7 +41,7 @@ public class TwilioService {
        catch (Exception e){
            System.err.println("An unexpected error occurred: " + e.getMessage());
            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                   .message("Incorrect mobile number or bad network" )
+                   .message("Mobile service not available" )
                    .build());}
        }
     }
