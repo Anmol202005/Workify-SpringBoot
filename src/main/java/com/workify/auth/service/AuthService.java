@@ -130,9 +130,9 @@ public class AuthService {
         if(repository.existsByUsernameAndVerified(contact,false)){
             var user=repository.findByUsername(contact).orElseThrow();
             long minuteElapsed = user.getRegisterRequestTimer() != null
-                    ? ChronoUnit.MINUTES.between(user.getRegisterRequestTimer(), LocalDateTime.now())
-                    : 1;
-            if(minuteElapsed<0.5){return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
+                    ? ChronoUnit.SECONDS.between(user.getRegisterRequestTimer(), LocalDateTime.now())
+                    : 60;
+            if(minuteElapsed<30){return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Can't send request before 30 seconds")
                     .build());}
 
@@ -292,10 +292,10 @@ public class AuthService {
 
         var user = repository.findByUsername(contact).orElseThrow();
         long minuteElapsed = user.getResendOtpTimer() != null
-                ? ChronoUnit.MINUTES.between(user.getResendOtpTimer(), LocalDateTime.now())
-                :1;
+                ? ChronoUnit.SECONDS.between(user.getResendOtpTimer(), LocalDateTime.now())
+                :60;
 
-        if(minuteElapsed<0.5){
+        if(minuteElapsed<30){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("OTP can not be send before 30 second")
                     .build());
@@ -353,9 +353,8 @@ public class AuthService {
         }
 
         var user=repository.findByUsername(request.getContact()).orElseThrow();
-        long minuteElapsed = ChronoUnit.MINUTES.between(user.getResendOtpTimer(), LocalDateTime.now());
 
-        if( request.getNewPassword().equals(request.getConfirmPassword())&& user.getChangepassOTP()==true && ((minuteElapsed < 5)||  user.getOtpGenerated()==null)   ){
+        if( request.getNewPassword().equals(request.getConfirmPassword())&& user.getChangepassOTP()==true    ){
             user.setPassword(passwordEncoder.encode(request.getNewPassword()));
             user.setChangepassOTP(false);
             repository.save(user);
