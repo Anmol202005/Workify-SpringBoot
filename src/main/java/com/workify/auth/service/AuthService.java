@@ -131,7 +131,7 @@ public class AuthService {
             var user=repository.findByUsername(contact).orElseThrow();
             long minuteElapsed = user.getRegisterRequestTimer() != null
                     ? ChronoUnit.MINUTES.between(user.getRegisterRequestTimer(), LocalDateTime.now())
-                    : 0;
+                    : 1;
             if(minuteElapsed<0.5){return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Can't send request before 30 seconds")
                     .build());}
@@ -293,7 +293,7 @@ public class AuthService {
         var user = repository.findByUsername(contact).orElseThrow();
         long minuteElapsed = user.getResendOtpTimer() != null
                 ? ChronoUnit.MINUTES.between(user.getResendOtpTimer(), LocalDateTime.now())
-                : 0;
+                :1;
 
         if(minuteElapsed<0.5){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
