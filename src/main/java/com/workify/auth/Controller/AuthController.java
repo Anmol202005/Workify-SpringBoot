@@ -45,7 +45,7 @@ public class AuthController {
     ){
         return service.verifyForgotPassword(otp);
     }
-    @GetMapping("/verify-otp-forgotpassword")
+    @PostMapping("/verify-otp-forgotpassword")
     public ResponseEntity<ResponseMessage> verifyOtpForgotPassword(
             @RequestBody OtpValidate request
     ){
