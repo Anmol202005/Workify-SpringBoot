@@ -40,6 +40,8 @@ public class AuthService {
 //
 //        }
 
+
+
         if(repository.existsByEmail(request.getEmail()) && request.getEmail()!=null && !request.getEmail().isEmpty()){
             Optional<User> userOptional = repository.findByEmailAndVerified(request.getEmail() , true);
 
@@ -127,6 +129,14 @@ public class AuthService {
         String contact=request.getEmail()!=null ? request.getEmail() : request.getMobile();
         if(repository.existsByUsernameAndVerified(contact,false)){
             var user=repository.findByUsername(contact).orElseThrow();
+            long minuteElapsed = user.getRegisterRequestTimer() != null
+                    ? ChronoUnit.MINUTES.between(user.getRegisterRequestTimer(), LocalDateTime.now())
+                    : 0;
+            if(minuteElapsed<0.5){return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
+                    .message("Can't send request before 30 seconds")
+                    .build());}
+
+
             user.setFirstName(request.getFirstName());
             user.setLastName(request.getLastName());
             user.setEmail(request.getEmail());
@@ -137,6 +147,7 @@ public class AuthService {
             String otp= generateotp();
             user.setOtp(otp);
             user.setOtpGenerated(LocalDateTime.now());
+            user. setRegisterRequestTimer(LocalDateTime.now());
             repository.save(user);
             if(user.getEmail()!=null){
                 return (sendVerificationEmail(user.getEmail(), otp));
@@ -155,6 +166,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(role)
                 .verified(false)
+                .registerRequestTimer(LocalDateTime.now())
                 .build();
 
 
@@ -277,10 +289,21 @@ public class AuthService {
                     .message("Contact not registered")
                     .build());
         }
+
         var user = repository.findByUsername(contact).orElseThrow();
+        long minuteElapsed = user.getResendOtpTimer() != null
+                ? ChronoUnit.MINUTES.between(user.getResendOtpTimer(), LocalDateTime.now())
+                : 0;
+
+        if(minuteElapsed<0.5){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
+                    .message("OTP can not be send before 30 second")
+                    .build());
+        }
         String otp= generateotp();
         user.setOtp(otp);
         user.setOtpGenerated(LocalDateTime.now());
+        user.setResendOtpTimer(LocalDateTime.now());
         repository.save(user);
         if(user.getEmail()!=null){
             return (sendVerificationEmail(user.getEmail(), otp));
@@ -330,25 +353,53 @@ public class AuthService {
         }
 
         var user=repository.findByUsername(request.getContact()).orElseThrow();
-        long minuteElapsed = ChronoUnit.MINUTES.between(user.getOtpGenerated(), LocalDateTime.now());
-        if(user.getOtp().equals(request.getOtp()) && request.getNewPassword().equals(request.getConfirmPassword()) && minuteElapsed < 5 ){
+        long minuteElapsed = ChronoUnit.MINUTES.between(user.getResendOtpTimer(), LocalDateTime.now());
+
+        if( request.getNewPassword().equals(request.getConfirmPassword())&& user.getChangepassOTP()==true && ((minuteElapsed < 5)||  user.getOtpGenerated()==null)   ){
             user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            user.setChangepassOTP(false);
             repository.save(user);
             return ResponseEntity.ok(ResponseMessage.builder()
                     .message("Password changed successfully")
                     .build());
         }
         else {
-            if(!user.getOtp().equals(request.getOtp()) || minuteElapsed >5  )
-            {return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                        .message("OTP invalid")
-                        .build());
-                }
-            else{
+
+             if( !user.getChangepassOTP()==true){
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                        .message("Confirm Password not same as New password")
+                        .message("Otp not verified")
                         .build());
             }
+            else if(!request.getNewPassword().equals(request.getConfirmPassword()))
+            { return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
+                    .message("Confirm Password not same as New password")
+                    .build());}
+            else{
+                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
+                         .message("Otp timeout")
+                         .build());
+             }
+
         }
+    }
+
+    public ResponseEntity<ResponseMessage> verifyOtpForgotPassword(OtpValidate request) {
+        if(!repository.existsByUsername(request.getContact())){return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
+                .message("Invalid Contact")
+                .build());}
+        var user=repository.findByUsername(request.getContact()).orElseThrow();
+        long minuteElapsed = ChronoUnit.MINUTES.between(user.getResendOtpTimer(), LocalDateTime.now());
+        if(user.getOtp().equals(request.getOtp()) && minuteElapsed < 5){
+            user.setChangepassOTP(true);
+            repository.save(user);
+            return ResponseEntity.ok(ResponseMessage.builder()
+                    .message("valid OTP")
+                    .build());
+        }else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
+                    .message("invalid OTP")
+                    .build());
+        }
+
     }
 }
