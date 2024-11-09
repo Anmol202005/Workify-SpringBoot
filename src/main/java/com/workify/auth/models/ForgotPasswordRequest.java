@@ -7,5 +7,5 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ForgotPasswordRequest {
-    private String username;
+    private String contact;
 }

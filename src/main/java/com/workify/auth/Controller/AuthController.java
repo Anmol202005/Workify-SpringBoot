@@ -4,6 +4,7 @@ import com.workify.auth.models.*;
 import com.workify.auth.service.AuthService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,36 +12,43 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
+    @Autowired
     private final AuthService service;
     @PostMapping("/register")
     public ResponseEntity<String> register(
             @RequestBody RegisterRequest request
-    ) throws MessagingException {
-        return ResponseEntity.ok(service.register(request));
+    )  {
+        return service.register(request);
 
     }
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(
             @RequestBody AuthenticationRequest request
     ){
-        return ResponseEntity.ok(service.authenticate(request));
+        return service.authenticate(request);
     }
     @PostMapping("/validate")
     public ResponseEntity<AuthenticationResponse> validate(
             @RequestBody OtpValidate request
     ){
-        return ResponseEntity.ok(service.validate(request));
+        return service.validate(request);
     }
     @PostMapping("/forgot-password")
     public ResponseEntity<ResponseMessage> forgotPassword(
             @RequestBody ForgotPasswordRequest request
     ) throws MessagingException {
-        return ResponseEntity.ok(service.forgotPassword(request.getUsername()));
+        return service.forgotPassword(request.getContact());
     }
-    @PutMapping("/verify-otp")
+    @PutMapping("/change-password")
     public ResponseEntity<ResponseMessage> verify(
             @RequestBody ValidateForgotPasswordRequest otp
     ){
-        return ResponseEntity.ok(service.verifyForgotPassword(otp));
+        return service.verifyForgotPassword(otp);
+    }
+    @PostMapping("/verify-otp-forgotpassword")
+    public ResponseEntity<ResponseMessage> verifyOtpForgotPassword(
+            @RequestBody OtpValidate request
+    ){
+        return service.verifyOtpForgotPassword(request);
     }
 }

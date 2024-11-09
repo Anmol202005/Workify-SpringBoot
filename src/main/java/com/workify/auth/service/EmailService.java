@@ -15,25 +15,25 @@ public class EmailService {
     public EmailService(JavaMailSender mailSender){
         this.mailSender=mailSender;
     }
-    public ResponseMessage sendEmail(String to, String subject, String body) {
+    public ResponseEntity sendEmail(String to, String subject, String body,Boolean ishtml) {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper;
         try {
             helper = new MimeMessageHelper(message, true);
             helper.setTo(to);
             helper.setSubject(subject);
-            helper.setText(body);
+            helper.setText(body,ishtml);
             mailSender.send(message);
             // Return a successful response if email is sent
 
-            return ResponseMessage.builder()
+            return ResponseEntity.ok(ResponseMessage.builder()
                     .message("Email sent successfully to " + to)
-                    .build();
+                    .build());
         } catch (Exception e) {
             // Handle any other exceptions
             System.err.println("An unexpected error occurred: " + e.getMessage());
-            return ResponseMessage.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Either invalid Email or connection issue")
-                    .build();
+                    .build());
         }
     }}
