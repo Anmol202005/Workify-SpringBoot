@@ -3,6 +3,7 @@ package com.workify.auth.Controller;
 import com.workify.auth.models.*;
 import com.workify.auth.service.AuthService;
 import jakarta.mail.MessagingException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,8 +16,8 @@ public class AuthController {
     @Autowired
     private final AuthService service;
     @PostMapping("/register")
-    public ResponseEntity<String> register(
-            @RequestBody RegisterRequest request
+    public ResponseEntity<ResponseMessage> register(
+          @Valid @RequestBody RegisterRequest request
     )  {
         return service.register(request);
 
@@ -41,7 +42,7 @@ public class AuthController {
     }
     @PutMapping("/change-password")
     public ResponseEntity<ResponseMessage> verify(
-            @RequestBody ValidateForgotPasswordRequest otp
+           @Valid @RequestBody ValidateForgotPasswordRequest otp
     ){
         return service.verifyForgotPassword(otp);
     }
