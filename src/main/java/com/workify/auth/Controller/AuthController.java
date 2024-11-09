@@ -3,6 +3,7 @@ package com.workify.auth.Controller;
 import com.workify.auth.models.*;
 import com.workify.auth.service.AuthService;
 import jakarta.mail.MessagingException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,7 @@ public class AuthController {
     private final AuthService service;
     @PostMapping("/register")
     public ResponseEntity<ResponseMessage> register(
-            @RequestBody RegisterRequest request
+          @Valid @RequestBody RegisterRequest request
     )  {
         return service.register(request);
 

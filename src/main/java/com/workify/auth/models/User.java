@@ -2,6 +2,10 @@ package com.workify.auth.models;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,6 +29,8 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue
     private Integer id;
+    @NotNull(message = "First name cannot be null")
+    @Size(max = 20, message = "First name should not be more than 20 characters")
     private String firstName;
     private String lastName;
     private String username;

@@ -61,70 +61,15 @@ public class AuthService {
             }
         }
 
-//        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
-//            return ResponseMessage.builder()
-//                    .message("Username must be less than 15 characters and greater than 5")
-//                    .build();
-//        }
-//        if (request.getUsername().contains(" ")) {
-//            return ResponseMessage.builder()
-//                    .message("Username must not contain spaces")
-//                    .build();
-//        }
-        if(request.getFirstName().isEmpty()){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                    .message("First name is required")
-                    .build());
-        }
-        if(request.getFirstName().length()>20){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                    .message("First name can not be longer than 20 characters")
-                    .build());
-        }
-        if(request.getLastName()!=null){
-        if(request.getLastName().length()>20){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                    .message("Last name can not be longer than 20 characters")
-                    .build());
-        }}
 
         if(request.getEmail()==null && request.getMobile().isEmpty()){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Either Email or Mobile number is required")
                     .build());
         }
-
+//
+//
         String password = request.getPassword();
-        if (password.length() < 8 || password.length()>20) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                    .message("Password must greater than 8 characters and less than 20 characters")
-                    .build());
-        }
-        if (!password.matches(".*[A-Z].*")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                    .message("Password must contain at least one uppercase letter")
-                    .build());
-        }
-        if (!password.matches(".*[a-z].*")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                    .message("Password must contain at least one lowercase letter")
-                    .build());
-        }
-        if (!password.matches(".*\\d.*")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                    .message("Password must contain at least one digit")
-                    .build());
-        }
-        if (!password.matches(".*[!@#$%^&*()\\-_=+{};:,<.>].*")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                    .message("Password must contain at least one special character")
-                    .build());
-        }
-        if (password.contains(" ")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                    .message("Password must not contain spaces")
-                    .build());
-        }
         Role role = request.getRole() != null ? request.getRole() : Role.CANDIDATE;
         String contact=request.getEmail()!=null ? request.getEmail() : request.getMobile();
         if(repository.existsByUsernameAndVerified(contact,false)){
@@ -185,12 +130,7 @@ public class AuthService {
     }
 
     public ResponseEntity authenticate(AuthenticationRequest request) {
-//        if (request.getUs().length() >= 15 || request.getUsername().length() < 5) {
-//            return  AuthenticationResponse.builder()
-//                    .token(null)
-//                    .message("Username must be less than 15 characters and greater than 5")
-//                    .build();
-//        }
+//
         if(!repository.existsByUsername(request.getContact())){ return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(AuthenticationResponse.builder()
                 .message("User does not exist")
                 .build());}
@@ -242,21 +182,7 @@ public class AuthService {
     }
 
     public ResponseEntity validate(OtpValidate request) {
-//        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
-//            return  AuthenticationResponse.builder()
-//                    .message("Username must be less than 15 characters and greater than 5")
-//                    .build();
-//        }
-//        if(repository.existsByUsername(request.getUsername())){
-//            Optional<User> userOptional = repository.findByUsername(request.getUsername());
 //
-//            if (userOptional.isPresent() && userOptional.get().getVerified()) {
-//                return AuthenticationResponse.builder()
-//                        .message("Username already exists")
-//                        .build();
-//            }
-//
-//        }
         if(!repository.existsByUsername(request.getContact())){return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(AuthenticationResponse.builder()
                 .message("Invalid Contact")
                 .build());}
@@ -279,11 +205,7 @@ public class AuthService {
     }
 
     public ResponseEntity forgotPassword(String contact)  {
-//        if (username.length() >= 15 || username.length() < 5) {
-//            return ResponseMessage.builder()
-//                    .message("Username should be greater than 5 characters and less than 15")
-//                    .build();
-//        }
+//
         if(!repository.existsByUsername(contact)){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Contact not registered")
@@ -315,42 +237,38 @@ public class AuthService {
     }
 
     public ResponseEntity verifyForgotPassword(ValidateForgotPasswordRequest request) {
-//        if (request.getUsername().length() >= 15 || request.getUsername().length() < 5) {
-//            return ResponseMessage.builder()
-//                    .message("Username must be less than 15 characters and greater than 5")
-//                    .build();
-//        }
+//
         String password = request.getNewPassword();
-        if (password.length() < 8 || password.length()>20) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                    .message("Password must greater than 8 characters and less than 20 characters")
-                    .build());
-        }
-        if (!password.matches(".*[A-Z].*")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                    .message("Password must contain at least one uppercase letter")
-                    .build());
-        }
-        if (!password.matches(".*[a-z].*")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                    .message("Password must contain at least one lowercase letter")
-                    .build());
-        }
-        if (!password.matches(".*\\d.*")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                    .message("Password must contain at least one digit")
-                    .build());
-        }
-        if (!password.matches(".*[!@#$%^&*()\\-_=+{};:,<.>].*")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                    .message("Password must contain at least one special character")
-                    .build());
-        }
-        if (password.contains(" ")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                    .message("Password must not contain spaces")
-                    .build());
-        }
+//        if (password.length() < 8 || password.length()>20) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
+//                    .message("Password must greater than 8 characters and less than 20 characters")
+//                    .build());
+//        }
+//        if (!password.matches(".*[A-Z].*")) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
+//                    .message("Password must contain at least one uppercase letter")
+//                    .build());
+//        }
+//        if (!password.matches(".*[a-z].*")) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
+//                    .message("Password must contain at least one lowercase letter")
+//                    .build());
+//        }
+//        if (!password.matches(".*\\d.*")) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
+//                    .message("Password must contain at least one digit")
+//                    .build());
+//        }
+//        if (!password.matches(".*[!@#$%^&*()\\-_=+{};:,<.>].*")) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
+//                    .message("Password must contain at least one special character")
+//                    .build());
+//        }
+//        if (password.contains(" ")) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
+//                    .message("Password must not contain spaces")
+//                    .build());
+//        }
 
         var user=repository.findByUsername(request.getContact()).orElseThrow();
 
