@@ -14,26 +14,25 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.ctc.wstx.shaded.msv_core.datatype.xsd.NumberType.save;
-
 @Service
 public class RecruiterService {
     private final RecruiterRepository recruiterRepository;
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     public RecruiterService(RecruiterRepository recruiterRepository) {
         this.recruiterRepository = recruiterRepository;
     }
 
-    public Recruiter createRecruiter(RecruiterDto recruiterdto , HttpServletRequest request) {
+    public Recruiter createRecruiter(RecruiterDto recruiterdto, HttpServletRequest request) {
         final String authHeader = request.getHeader("Authorization");
         final String username;
         String token = authHeader.replace("Bearer ", "");
         username = Jwtservice.extractusername(token);
 
         Optional<User> user = userRepository.findByUsername(username);
-        return convertDtoToRecruiter(recruiterdto,user);
+        return convertDtoToRecruiter(recruiterdto, user);
     }
 
     public Optional<Recruiter> getRecruiterProfile(Integer id) {
@@ -54,6 +53,18 @@ public class RecruiterService {
 
     public Page<Recruiter> searchRecruiters(String keyword, Pageable pageable) {
         return recruiterRepository.findByCompanyNameContainingOrJobTitleContainingOrIndustryContaining(keyword, keyword, keyword, pageable);
+    }
+
+    public Page<Recruiter> searchByCompanyName(String companyName, Pageable pageable) {
+        return recruiterRepository.findByCompanyNameContaining(companyName, pageable);
+    }
+
+    public Page<Recruiter> searchByJobTitle(String jobTitle, Pageable pageable) {
+        return recruiterRepository.findByJobTitleContaining(jobTitle, pageable);
+    }
+
+    public Page<Recruiter> searchByIndustry(String industry, Pageable pageable) {
+        return recruiterRepository.findByIndustryContaining(industry, pageable);
     }
 
     public Optional<Recruiter> getRecruiterByUserId(Integer userId) {
@@ -91,7 +102,8 @@ public class RecruiterService {
             throw new RuntimeException("Recruiter not found");
         }
     }
-    private Recruiter convertDtoToRecruiter(RecruiterDto recruiterDto , Optional<User> user) {
+
+    private Recruiter convertDtoToRecruiter(RecruiterDto recruiterDto, Optional<User> user) {
         Recruiter recruiter = new Recruiter();
         recruiter.setUser(user.get());
         recruiter.setCompanyEmail(recruiterDto.getCompanyEmail());

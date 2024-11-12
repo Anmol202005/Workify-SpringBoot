@@ -11,5 +11,8 @@ import java.util.Optional;
 @Repository
 public interface RecruiterRepository extends JpaRepository<Recruiter, Integer> {
     Page<Recruiter> findByCompanyNameContainingOrJobTitleContainingOrIndustryContaining(String companyName, String jobTitle, String industry, Pageable pageable);
+    Page<Recruiter> findByCompanyNameContaining(String companyName, Pageable pageable);
+    Page<Recruiter> findByJobTitleContaining(String jobTitle, Pageable pageable);
+    Page<Recruiter> findByIndustryContaining(String industry, Pageable pageable);
     Optional<Recruiter> findByUserId(Integer userId);
 }

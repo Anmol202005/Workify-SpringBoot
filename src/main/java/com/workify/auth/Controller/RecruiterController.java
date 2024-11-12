@@ -1,4 +1,5 @@
 package com.workify.auth.Controller;
+
 import com.workify.auth.models.Recruiter;
 import com.workify.auth.models.dto.RecruiterDto;
 import com.workify.auth.service.RecruiterService;
@@ -23,7 +24,7 @@ public class RecruiterController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createRecruiter(@RequestBody RecruiterDto recruiterdto, HttpServletRequest request) {
-        return ResponseEntity.ok(recruiterService.createRecruiter(recruiterdto,request));
+        return ResponseEntity.ok(recruiterService.createRecruiter(recruiterdto, request));
     }
 
     @GetMapping("/{id}")
@@ -50,6 +51,21 @@ public class RecruiterController {
     @GetMapping("/search")
     public ResponseEntity<Page<Recruiter>> searchRecruiters(@RequestParam String keyword, Pageable pageable) {
         return ResponseEntity.ok(recruiterService.searchRecruiters(keyword, pageable));
+    }
+
+    @GetMapping("/search/companyName")
+    public ResponseEntity<Page<Recruiter>> searchByCompanyName(@RequestParam String companyName, Pageable pageable) {
+        return ResponseEntity.ok(recruiterService.searchByCompanyName(companyName, pageable));
+    }
+
+    @GetMapping("/search/jobTitle")
+    public ResponseEntity<Page<Recruiter>> searchByJobTitle(@RequestParam String jobTitle, Pageable pageable) {
+        return ResponseEntity.ok(recruiterService.searchByJobTitle(jobTitle, pageable));
+    }
+
+    @GetMapping("/search/industry")
+    public ResponseEntity<Page<Recruiter>> searchByIndustry(@RequestParam String industry, Pageable pageable) {
+        return ResponseEntity.ok(recruiterService.searchByIndustry(industry, pageable));
     }
 
     @GetMapping("/user/{userId}")
