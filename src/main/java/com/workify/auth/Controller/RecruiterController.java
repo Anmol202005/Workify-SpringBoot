@@ -1,6 +1,8 @@
 package com.workify.auth.Controller;
 
+import com.workify.auth.models.Job;
 import com.workify.auth.models.Recruiter;
+import com.workify.auth.models.dto.JobDto;
 import com.workify.auth.models.dto.RecruiterDto;
 import com.workify.auth.service.RecruiterService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -74,7 +76,11 @@ public class RecruiterController {
     }
 
     @PatchMapping("/update/{id}")
-    public ResponseEntity<?> updateRecruiterFields(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
-        return ResponseEntity.ok(recruiterService.updateRecruiterFields(id, updates));
+    public ResponseEntity<?> updateRecruiterFields(@PathVariable Integer id, @RequestBody RecruiterDto recruiterDto) {
+        return ResponseEntity.ok(recruiterService.updateRecruiterFields(id, recruiterDto));
+    }
+    @PostMapping("/{recruiterId}/postJob")
+    public ResponseEntity<Job> postJob(@PathVariable Integer recruiterId, @RequestBody JobDto jobDto) {
+        return ResponseEntity.ok(recruiterService.postJob(recruiterId, jobDto));
     }
 }
