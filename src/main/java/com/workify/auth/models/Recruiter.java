@@ -14,7 +14,7 @@ public class Recruiter {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -25,5 +25,4 @@ public class Recruiter {
     private String companyWebsite;
     private String companyLocation;
     private String industry;
-
 }

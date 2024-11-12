@@ -1,6 +1,8 @@
 package com.workify.auth.Controller;
 import com.workify.auth.models.Recruiter;
+import com.workify.auth.models.dto.RecruiterDto;
 import com.workify.auth.service.RecruiterService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,8 +22,8 @@ public class RecruiterController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createRecruiter(@RequestBody Recruiter recruiter) {
-        return ResponseEntity.ok(recruiterService.createRecruiter(recruiter));
+    public ResponseEntity<?> createRecruiter(@RequestBody RecruiterDto recruiterdto, HttpServletRequest request) {
+        return ResponseEntity.ok(recruiterService.createRecruiter(recruiterdto,request));
     }
 
     @GetMapping("/{id}")
@@ -40,25 +42,21 @@ public class RecruiterController {
         return ResponseEntity.ok().build();
     }
 
-    // New endpoint to list all recruiters with pagination
     @GetMapping("/all")
     public ResponseEntity<Page<Recruiter>> getAllRecruiters(Pageable pageable) {
         return ResponseEntity.ok(recruiterService.getAllRecruiters(pageable));
     }
 
-    // New endpoint to search recruiters by criteria
     @GetMapping("/search")
     public ResponseEntity<Page<Recruiter>> searchRecruiters(@RequestParam String keyword, Pageable pageable) {
         return ResponseEntity.ok(recruiterService.searchRecruiters(keyword, pageable));
     }
 
-    // New endpoint to get recruiter by user ID
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getRecruiterByUserId(@PathVariable Integer userId) {
         return ResponseEntity.ok(recruiterService.getRecruiterByUserId(userId));
     }
 
-    // New endpoint to update specific fields of recruiter profile
     @PatchMapping("/update/{id}")
     public ResponseEntity<?> updateRecruiterFields(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
         return ResponseEntity.ok(recruiterService.updateRecruiterFields(id, updates));

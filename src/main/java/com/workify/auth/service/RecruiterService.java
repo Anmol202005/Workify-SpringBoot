@@ -1,7 +1,11 @@
 package com.workify.auth.service;
 
 import com.workify.auth.models.Recruiter;
+import com.workify.auth.models.User;
+import com.workify.auth.models.dto.RecruiterDto;
 import com.workify.auth.repository.RecruiterRepository;
+import com.workify.auth.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,17 +14,26 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.ctc.wstx.shaded.msv_core.datatype.xsd.NumberType.save;
+
 @Service
 public class RecruiterService {
     private final RecruiterRepository recruiterRepository;
-
+    @Autowired
+    private UserRepository userRepository;
     @Autowired
     public RecruiterService(RecruiterRepository recruiterRepository) {
         this.recruiterRepository = recruiterRepository;
     }
 
-    public Recruiter createRecruiter(Recruiter recruiter) {
-        return recruiterRepository.save(recruiter);
+    public Recruiter createRecruiter(RecruiterDto recruiterdto , HttpServletRequest request) {
+        final String authHeader = request.getHeader("Authorization");
+        final String username;
+        String token = authHeader.replace("Bearer ", "");
+        username = Jwtservice.extractusername(token);
+
+        Optional<User> user = userRepository.findByUsername(username);
+        return convertDtoToRecruiter(recruiterdto,user);
     }
 
     public Optional<Recruiter> getRecruiterProfile(Integer id) {
@@ -77,5 +90,17 @@ public class RecruiterService {
         } else {
             throw new RuntimeException("Recruiter not found");
         }
+    }
+    private Recruiter convertDtoToRecruiter(RecruiterDto recruiterDto , Optional<User> user) {
+        Recruiter recruiter = new Recruiter();
+        recruiter.setUser(user.get());
+        recruiter.setCompanyEmail(recruiterDto.getCompanyEmail());
+        recruiter.setCompanyName(recruiterDto.getCompanyName());
+        recruiter.setJobTitle(recruiterDto.getJobTitle());
+        recruiter.setCompanyWebsite(recruiterDto.getCompanyWebsite());
+        recruiter.setCompanyLocation(recruiterDto.getCompanyLocation());
+        recruiter.setIndustry(recruiterDto.getIndustry());
+        recruiterRepository.save(recruiter);
+        return recruiter;
     }
 }
