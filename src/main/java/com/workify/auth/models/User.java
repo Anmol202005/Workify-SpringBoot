@@ -1,6 +1,7 @@
 package com.workify.auth.models;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -38,6 +39,7 @@ public class User implements UserDetails {
     private String mobile;
     private String password;
     @Enumerated(EnumType.STRING)
+    @JsonBackReference
     private Role role;
     private String otp;
     private LocalDateTime otpGenerated;

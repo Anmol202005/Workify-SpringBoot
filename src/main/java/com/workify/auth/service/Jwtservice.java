@@ -19,10 +19,10 @@ import java.util.function.Function;
 public class Jwtservice {
     //this should be minimum 256 bits encryption key
     private static final String SECRET_KEY = "27bc5821f84be3dca9696869c6248a4bbbf23e30906f1a6c7c2b79ce30e3c32a";
-    public String extractusername(String token) {
+    public static String extractusername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    public static <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
@@ -60,7 +60,7 @@ public class Jwtservice {
             return extractClaim(token, Claims::getExpiration);
         }
 
-    private Claims extractAllClaims(String token){
+    private static Claims extractAllClaims(String token){
         return Jwts
                 .parserBuilder()
                 //it's the signature part of jwt
@@ -69,7 +69,7 @@ public class Jwtservice {
                 .parseClaimsJws(token)
                 .getBody();
     }
-    private Key getSignInKey() {
+    private static Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }

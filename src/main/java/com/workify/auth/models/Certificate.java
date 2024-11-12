@@ -17,10 +17,10 @@ public class Certificate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
+    private String certificateName;
 
-    @Lob
     @Column(name = "certificate_data")
     private byte[] certificateData;
 
