@@ -2,6 +2,7 @@ package com.workify.auth.service;
 
 import com.workify.auth.models.Job;
 import com.workify.auth.models.Recruiter;
+import com.workify.auth.models.Role;
 import com.workify.auth.models.User;
 import com.workify.auth.models.dto.JobDto;
 import com.workify.auth.models.dto.RecruiterDto;
@@ -14,36 +15,20 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
 import java.util.Optional;
 
 @Service
 public class RecruiterService {
     private final RecruiterRepository recruiterRepository;
-    private final JobRepository jobRepository;
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
-    public RecruiterService(RecruiterRepository recruiterRepository, JobRepository jobRepository) {
+    public RecruiterService(RecruiterRepository recruiterRepository) {
         this.recruiterRepository = recruiterRepository;
-        this.jobRepository = jobRepository;
+
     }
-    public Job postJob(Integer recruiterId, JobDto jobDto) {
-        Optional<Recruiter> recruiterOptional = recruiterRepository.findById(recruiterId);
-        if (recruiterOptional.isPresent()) {
-            Job job = new Job();
-            job.setRecruiter(recruiterOptional.get());
-            job.setTitle(jobDto.getTitle());
-            job.setDescription(jobDto.getDescription());
-            job.setLocation(jobDto.getLocation());
-            job.setIndustry(jobDto.getIndustry());
-            job.setEmploymentType(jobDto.getEmploymentType());
-            return jobRepository.save(job);
-        } else {
-            throw new RuntimeException("Recruiter not found");
-        }
-    }
+
     public Recruiter createRecruiter(RecruiterDto recruiterdto, HttpServletRequest request) {
         final String authHeader = request.getHeader("Authorization");
         final String username;
@@ -51,19 +36,48 @@ public class RecruiterService {
         username = Jwtservice.extractusername(token);
 
         Optional<User> user = userRepository.findByUsername(username);
-        return convertDtoToRecruiter(recruiterdto, user);
+        if (user.isPresent()) {
+            Recruiter recruiter = convertDtoToRecruiter(recruiterdto, user);
+            user.get().setRole(Role.RECRUITER); // Update role to recruiter
+            userRepository.save(user.get()); // Save the updated user
+            return recruiter;
+        } else {
+            throw new RuntimeException("User not found");
+        }
     }
 
-    public Optional<Recruiter> getRecruiterProfile(Integer id) {
+    public Optional<Recruiter> getRecruiterProfile(Long id) {
         return recruiterRepository.findById(id);
     }
 
-    public Recruiter updateRecruiterProfile(Recruiter recruiter) {
-        return recruiterRepository.save(recruiter);
+    public Recruiter updateRecruiterProfile(RecruiterDto recruiter,HttpServletRequest request) {
+        final String authHeader = request.getHeader("Authorization");
+        final String username;
+        String token = authHeader.replace("Bearer ", "");
+        username = Jwtservice.extractusername(token);
+
+        Optional<User> user = userRepository.findByUsername(username);
+        Optional<Recruiter> recruiterOptional = recruiterRepository.findByUser(user.get());
+        if (recruiterOptional.isPresent()) {
+            return updateRecruiterFields(recruiterOptional.get().getId(), recruiter);
+        } else {
+            throw new RuntimeException("Recruiter not found");
+        }
     }
 
-    public void deleteRecruiterProfile(Integer id) {
-        recruiterRepository.deleteById(id);
+    public void deleteRecruiterProfile(HttpServletRequest id) {
+        final String authHeader = id.getHeader("Authorization");
+        final String username;
+        String token = authHeader.replace("Bearer ", "");
+        username = Jwtservice.extractusername(token);
+
+        Optional<User> user = userRepository.findByUsername(username);
+        Optional<Recruiter> recruiter = recruiterRepository.findByUser(user.get());
+        if (recruiter.isPresent()) {
+            recruiterRepository.delete(recruiter.get());
+        } else {
+            throw new RuntimeException("Recruiter not found");
+        }
     }
 
     public Page<Recruiter> getAllRecruiters(Pageable pageable) {
@@ -86,11 +100,11 @@ public class RecruiterService {
         return recruiterRepository.findByIndustryContaining(industry, pageable);
     }
 
-    public Optional<Recruiter> getRecruiterByUserId(Integer userId) {
+    public Optional<Recruiter> getRecruiterByUserId(Long userId) {
         return recruiterRepository.findByUserId(userId);
     }
 
-    public Recruiter updateRecruiterFields(Integer id, RecruiterDto recruiterDto) {
+    public Recruiter updateRecruiterFields(Long id, RecruiterDto recruiterDto) {
         Optional<Recruiter> optionalRecruiter = recruiterRepository.findById(id);
         if (optionalRecruiter.isPresent()) {
             Recruiter recruiter = optionalRecruiter.get();

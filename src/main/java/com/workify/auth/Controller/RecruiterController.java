@@ -30,18 +30,18 @@ public class RecruiterController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getRecruiterProfile(@PathVariable Integer id) {
+    public ResponseEntity<?> getRecruiterProfile(@PathVariable Long id) {
         return ResponseEntity.ok(recruiterService.getRecruiterProfile(id));
     }
 
     @PutMapping("/update")
-    public ResponseEntity<?> updateRecruiterProfile(@RequestBody Recruiter recruiter) {
-        return ResponseEntity.ok(recruiterService.updateRecruiterProfile(recruiter));
+    public ResponseEntity<?> updateRecruiterProfile(@RequestBody RecruiterDto recruiter,HttpServletRequest request) {
+        return ResponseEntity.ok(recruiterService.updateRecruiterProfile(recruiter,request));
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteRecruiterProfile(@PathVariable Integer id) {
-        recruiterService.deleteRecruiterProfile(id);
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteRecruiterProfile(@RequestBody HttpServletRequest request) {
+        recruiterService.deleteRecruiterProfile(request);
         return ResponseEntity.ok().build();
     }
 
@@ -70,17 +70,8 @@ public class RecruiterController {
         return ResponseEntity.ok(recruiterService.searchByIndustry(industry, pageable));
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getRecruiterByUserId(@PathVariable Integer userId) {
-        return ResponseEntity.ok(recruiterService.getRecruiterByUserId(userId));
-    }
 
-    @PatchMapping("/update/{id}")
-    public ResponseEntity<?> updateRecruiterFields(@PathVariable Integer id, @RequestBody RecruiterDto recruiterDto) {
-        return ResponseEntity.ok(recruiterService.updateRecruiterFields(id, recruiterDto));
-    }
-    @PostMapping("/{recruiterId}/postJob")
-    public ResponseEntity<Job> postJob(@PathVariable Integer recruiterId, @RequestBody JobDto jobDto) {
-        return ResponseEntity.ok(recruiterService.postJob(recruiterId, jobDto));
-    }
+
+
+
 }
