@@ -4,6 +4,7 @@ package com.workify.auth.service;
 
 import com.workify.auth.models.*;
 import com.workify.auth.models.dto.CandidateDTO;
+import com.workify.auth.models.dto.GetResponse;
 import com.workify.auth.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CandidateService {
@@ -28,44 +30,83 @@ public class CandidateService {
     @Autowired
     private ExperienceRepository experienceRepository;
 
-    public List<Candidate> getAllCandidates() {
-        return candidateRepository.findAll();
+    public List<GetResponse> getAllCandidates() {
+        List<Candidate> candidates = candidateRepository.findAll();
+
+        // Map each Candidate to GetResponse
+        return candidates.stream().map(candidate -> {
+            GetResponse getResponse = new GetResponse();
+            getResponse.setFirstName(candidate.getUser().getFirstName());
+            getResponse.setLastName(candidate.getUser().getLastName());
+            getResponse.setEmail(candidate.getUser().getEmail());
+            getResponse.setPhone(candidate.getUser().getMobile());
+            getResponse.setEducation(candidate.getEducation());
+            getResponse.setExperience(candidate.getExperiences());
+            getResponse.setSkill(candidate.getSkills());
+            getResponse.setCertificate(candidate.getCertificates());
+            getResponse.setResume(candidate.getResume());
+            getResponse.setProfileImage(candidate.getProfileImage());
+            return getResponse;
+        }).collect(Collectors.toList());
     }
 
 
-    public Candidate getCandidateById(Long id) {
-        return candidateRepository.findById(id)
+
+    public GetResponse getCandidateById(Long id) {
+        var candidate = candidateRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Candidate not found with id " + id));
+
+
+        GetResponse getResponse = new GetResponse();
+        getResponse.setFirstName(candidate.getUser().getFirstName());
+        getResponse.setLastName(candidate.getUser().getLastName());
+        getResponse.setEmail(candidate.getUser().getEmail());
+        getResponse.setPhone(candidate.getUser().getMobile());
+        getResponse.setEducation(candidate.getEducation());
+        getResponse.setExperience(candidate.getExperiences());
+        getResponse.setSkill(candidate.getSkills());
+        getResponse.setCertificate(candidate.getCertificates());
+        getResponse.setResume(candidate.getResume());
+        getResponse.setProfileImage(candidate.getProfileImage());
+
+        return getResponse;
     }
 
 
-    public Candidate updateCandidate( CandidateDTO candidateDTO, HttpServletRequest request) {
-        final String authHeader = request.getHeader("Authorization");
-        final String username;
-        String token = authHeader.replace("Bearer ", "");
-        username=Jwtservice.extractusername(token);
 
-        Optional<User> user= userRepository.findByUsername(username);
+    public Candidate updateCandidate(CandidateDTO candidateDTO, HttpServletRequest request) {
+        final String authHeader = request.getHeader("Authorization");
+        final String token = authHeader.replace("Bearer ", "");
+        final String username = Jwtservice.extractusername(token);
+
+        Optional<User> user = userRepository.findByUsername(username);
         var candidate = candidateRepository.findByUser(user);
+
         candidate.setSkills(candidateDTO.getSkill());
-        educationRepository.deleteByCandidate( candidate );
-        List<Education> educations = candidateDTO.getEducations();
-        if (educations != null) {
-            for (Education education : educations) {
-                education.setCandidate(candidate);
+
+        // Update Education
+        List<Education> newEducations = candidateDTO.getEducations();
+        candidate.getEducation().clear();  // Clear existing list instead of deleting
+        if (newEducations != null) {
+            for (Education education : newEducations) {
+                education.setCandidate(candidate);  // Set the candidate for each education
+                candidate.getEducation().add(education);  // Add to the existing list
             }
-            candidate.setEducation(educations);
         }
-        experienceRepository.deleteByCandidate( candidate );
-        List<Experience> experiences = candidateDTO.getExperiences();
-        if (experiences != null) {
-            for (Experience experience : experiences) {
-                experience.setCandidate(candidate);
+
+        // Update Experience
+        List<Experience> newExperiences = candidateDTO.getExperiences();
+        candidate.getExperiences().clear();  // Clear existing list instead of deleting
+        if (newExperiences != null) {
+            for (Experience experience : newExperiences) {
+                experience.setCandidate(candidate);  // Set the candidate for each experience
+                candidate.getExperiences().add(experience);  // Add to the existing list
             }
-            candidate.setExperiences(experiences);
         }
+
         return candidateRepository.save(candidate);
     }
+
 
 
 
@@ -171,6 +212,20 @@ public class CandidateService {
         var candidate = candidateRepository.findByUser(user);
         candidate.setResume(null);
         candidateRepository.save(candidate);
+    }
+
+    public void saveProfilePicture(MultipartFile image, HttpServletRequest request) throws IOException {
+        byte[] imageData = image.getBytes();
+        final String authHeader = request.getHeader("Authorization");
+        final String username;
+        String token = authHeader.replace("Bearer ", "");
+        username=Jwtservice.extractusername(token);
+
+        Optional<User> user= userRepository.findByUsername(username);
+        var candidate = candidateRepository.findByUser(user);
+        candidate.setProfileImage(imageData);
+        candidateRepository.save(candidate);
+
     }
 }
 

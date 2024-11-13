@@ -32,6 +32,7 @@ public class Candidate {
 
 
     private byte[] resume;
+    private byte[] profileImage;
 
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "candidate")

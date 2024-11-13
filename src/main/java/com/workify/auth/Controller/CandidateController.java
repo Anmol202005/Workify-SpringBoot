@@ -3,6 +3,7 @@ import com.workify.auth.models.Candidate;
 import com.workify.auth.models.Education;
 import com.workify.auth.models.ResponseMessage;
 import com.workify.auth.models.dto.CandidateDTO;
+import com.workify.auth.models.dto.GetResponse;
 import com.workify.auth.service.AuthService;
 import com.workify.auth.service.CandidateService;
 import com.workify.auth.service.CandidateService;
@@ -37,24 +38,26 @@ public class CandidateController {
     }
 
     @GetMapping("/get-all")
-    public ResponseEntity<List<Candidate>> getAllCandidates() {
-        List<Candidate> candidates = candidateService.getAllCandidates();
+    public ResponseEntity<List<GetResponse>> getAllCandidates() {
+        List<GetResponse> candidates = candidateService.getAllCandidates();
         return ResponseEntity.ok(candidates);
     }
 
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<Candidate> getCandidateById(@PathVariable Long id) {
-        Candidate candidate = candidateService.getCandidateById(id) ;
+    public ResponseEntity<GetResponse> getCandidateById(@PathVariable Long id) {
+        GetResponse candidate = candidateService.getCandidateById(id) ;
         return ResponseEntity.ok(candidate);
     }
 
 
 
     @PatchMapping ("/update")
-    public ResponseEntity<Candidate> updateCandidate( @RequestBody CandidateDTO candidateDTO, HttpServletRequest request) {
+    public ResponseEntity<ResponseMessage> updateCandidate( @RequestBody CandidateDTO candidateDTO, HttpServletRequest request) {
         Candidate updatedCandidate = candidateService.updateCandidate( candidateDTO,request);
-        return ResponseEntity.ok(updatedCandidate);
+        return ResponseEntity.ok(ResponseMessage.builder()
+                .message("candidate updated successfully")
+                .build());
     }
 
 
@@ -100,12 +103,25 @@ public class CandidateController {
                 .message("Certificate Deleted successfully")
                 .build());
     }
-    @DeleteMapping("/delete-certificate")
+    @DeleteMapping("/delete-resume")
     public ResponseEntity<ResponseMessage> deleteResume(HttpServletRequest request) {
         candidateService.deleteResume(request);
 
         return ResponseEntity.ok(ResponseMessage.builder()
                 .message("Resume Deleted successfully")
+                .build());
+    }
+    @PostMapping("/Profile-picture")
+    public ResponseEntity<ResponseMessage> uploadProfilePicture(
+            @RequestParam("image") MultipartFile image,
+            HttpServletRequest request
+    ) throws IOException {
+
+
+        candidateService.saveProfilePicture(image,request);
+
+        return ResponseEntity.ok(ResponseMessage.builder()
+                .message("Profile photo uploaded successfully")
                 .build());
     }
 
