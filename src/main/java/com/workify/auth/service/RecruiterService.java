@@ -14,11 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
 public class RecruiterService {
+    @Autowired
     private final RecruiterRepository recruiterRepository;
     @Autowired
     private UserRepository userRepository;
@@ -29,6 +32,8 @@ public class RecruiterService {
 
     }
 
+
+
     public Recruiter createRecruiter(RecruiterDto recruiterdto, HttpServletRequest request) {
         final String authHeader = request.getHeader("Authorization");
         final String username;
@@ -38,8 +43,8 @@ public class RecruiterService {
         Optional<User> user = userRepository.findByUsername(username);
         if (user.isPresent()) {
             Recruiter recruiter = convertDtoToRecruiter(recruiterdto, user);
-            user.get().setRole(Role.RECRUITER); // Update role to recruiter
-            userRepository.save(user.get()); // Save the updated user
+            user.get().setRole(Role.RECRUITER);
+            userRepository.save(user.get());
             return recruiter;
         } else {
             throw new RuntimeException("User not found");
@@ -119,7 +124,21 @@ public class RecruiterService {
             throw new RuntimeException("Recruiter not found");
         }
     }
+    public void saveProfilePicture(MultipartFile image, HttpServletRequest id) throws IOException {
+        byte[] imageData = image.getBytes();
+        final String authHeader = id.getHeader("Authorization");
+        final String username;
+        String token = authHeader.replace("Bearer ", "");
+        username = Jwtservice.extractusername(token);
 
+        Optional<User> userOptional = userRepository.findByUsername(username);
+
+            User user = userOptional.get();
+            Optional<Recruiter> recruiterOptional = recruiterRepository.findByUser(user);
+                Recruiter recruiter = recruiterOptional.get();
+                recruiter.setProfileImage(imageData);
+                recruiterRepository.save(recruiter);
+    }
     private Recruiter convertDtoToRecruiter(RecruiterDto recruiterDto, Optional<User> user) {
         Recruiter recruiter = new Recruiter();
         recruiter.setUser(user.get());

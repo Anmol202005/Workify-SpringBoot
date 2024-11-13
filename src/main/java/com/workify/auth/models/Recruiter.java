@@ -25,4 +25,5 @@ public class Recruiter {
     private String companyWebsite;
     private String companyLocation;
     private String industry;
+    private byte[] profileImage;
 }
