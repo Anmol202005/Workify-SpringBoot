@@ -9,6 +9,7 @@ import com.workify.auth.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -29,6 +30,13 @@ public class CandidateService {
     private EducationRepository educationRepository;
     @Autowired
     private ExperienceRepository experienceRepository;
+
+    public  void deleteCertificateById(Long certificateId) {
+        if (!certificateRepository.existsById(certificateId)) {
+            throw new RuntimeException("Certificate with ID " + certificateId + " does not exist");
+        }
+        certificateRepository.deleteById(certificateId);
+    }
 
     public List<GetResponse> getAllCandidates() {
         List<Candidate> candidates = candidateRepository.findAll();
@@ -199,6 +207,10 @@ public class CandidateService {
 
         Optional<User> user= userRepository.findByUsername(username);
         var candidate = candidateRepository.findByUser(user);
+        if (!certificateRepository.existsByCertificateName(certificateName)) {
+            throw new RuntimeException("Certificate with name " + certificateName + " does not exist");
+        }
+
         certificateRepository.deleteByCandidateAndCertificateName(candidate, certificateName);
     }
 
@@ -226,6 +238,17 @@ public class CandidateService {
         candidate.setProfileImage(imageData);
         candidateRepository.save(candidate);
 
+    }
+    @Transactional
+    public void deleteAllCertificatesByCandidate(HttpServletRequest request) {
+        final String authHeader = request.getHeader("Authorization");
+        final String username;
+        String token = authHeader.replace("Bearer ", "");
+        username=Jwtservice.extractusername(token);
+
+        Optional<User> user= userRepository.findByUsername(username);
+        var candidate = candidateRepository.findByUser(user);
+        certificateRepository.deleteAllByCandidate(candidate);
     }
 }
 

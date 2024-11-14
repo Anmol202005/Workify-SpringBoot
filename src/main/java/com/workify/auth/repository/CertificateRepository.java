@@ -18,6 +18,8 @@ public interface CertificateRepository extends JpaRepository<Certificate,Long > 
     @Transactional
     @Query("DELETE FROM Certificate e WHERE e.candidate = :candidate AND e.certificateName = :certificateName")
     void deleteByCandidateAndCertificateName(Candidate candidate, String certificateName);
+    Boolean existsByCertificateName(String name);
+    void deleteAllByCandidate(Candidate candidate);
 
 
 }
