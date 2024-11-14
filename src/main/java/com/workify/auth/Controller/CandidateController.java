@@ -95,8 +95,8 @@ public class CandidateController {
                 .message("Resume uploaded successfully")
                 .build());
     }
-    @DeleteMapping("/delete-certificate")
-    public ResponseEntity<ResponseMessage> deleteCertificate(String certificateName,HttpServletRequest request) {
+    @DeleteMapping("/delete-certificate/{certificateName}")
+    public ResponseEntity<ResponseMessage> deleteCertificate(@PathVariable String certificateName,HttpServletRequest request) {
         candidateService.deleteCertificate(certificateName,request);
 
         return ResponseEntity.ok(ResponseMessage.builder()
@@ -122,6 +122,22 @@ public class CandidateController {
 
         return ResponseEntity.ok(ResponseMessage.builder()
                 .message("Profile photo uploaded successfully")
+                .build());
+    }
+    @DeleteMapping("/certificate/{id}")
+    public ResponseEntity<ResponseMessage> deleteCertificateById(@PathVariable Long id) {
+        candidateService.deleteCertificateById(id);
+        return ResponseEntity.ok(ResponseMessage.builder()
+                .message("Certificate deleted successfully")
+                .build());
+    }
+    @DeleteMapping("/delete-certificates-all")
+    public ResponseEntity<ResponseMessage> deleteAllCertificates(HttpServletRequest request) {
+
+        candidateService.deleteAllCertificatesByCandidate(request);
+
+        return ResponseEntity.ok(ResponseMessage.builder()
+                .message("All certificates deleted successfully")
                 .build());
     }
 
