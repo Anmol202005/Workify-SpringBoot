@@ -42,8 +42,10 @@ public class AuthService {
 
 
 
-        if(repository.existsByEmail(request.getEmail()) && request.getEmail()!=null && !request.getEmail().isEmpty()){
-            Optional<User> userOptional = repository.findByEmailAndVerified(request.getEmail() , true);
+        String email = request.getEmail() != null ? request.getEmail().toLowerCase() : null;
+
+        if (email != null && !email.isEmpty() && repository.existsByEmail(email)) {
+            Optional<User> userOptional = repository.findByEmailAndVerified(email, true);
 
             if (userOptional.isPresent() && userOptional.get().getVerified()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
@@ -51,6 +53,7 @@ public class AuthService {
                         .build());
             }
         }
+
         if(repository.existsByMobile(request.getMobile()) && request.getMobile()!=null && !request.getMobile().isEmpty()){
             Optional<User> userOptional = repository.findByMobileAndVerified(request.getMobile(),true);
 

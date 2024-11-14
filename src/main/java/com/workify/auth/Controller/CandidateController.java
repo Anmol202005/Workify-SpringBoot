@@ -96,7 +96,7 @@ public class CandidateController {
                 .build());
     }
     @DeleteMapping("/delete-certificate")
-    public ResponseEntity<ResponseMessage> deleteCertificate(String certificateName,HttpServletRequest request) {
+    public ResponseEntity<ResponseMessage> deleteCertificate(@RequestBody String certificateName,HttpServletRequest request) {
         candidateService.deleteCertificate(certificateName,request);
 
         return ResponseEntity.ok(ResponseMessage.builder()
