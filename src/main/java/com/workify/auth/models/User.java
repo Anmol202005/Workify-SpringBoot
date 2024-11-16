@@ -30,7 +30,7 @@ public class User implements UserDetails {
     @Getter
     @Id
     @GeneratedValue
-    private Integer id;
+    private Long id;
     @NotNull(message = "First name cannot be null")
     @Size(max = 20, message = "First name should not be more than 20 characters")
     private String firstName;

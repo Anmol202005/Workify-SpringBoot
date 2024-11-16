@@ -28,7 +28,8 @@ public class Job {
     private String industry;
     private String employmentType;
     private LocalDateTime postedAt;
-
+    private Integer minSalary;
+    private Integer maxSalary;
     @ElementCollection
     private List<String> requiredSkills;
 

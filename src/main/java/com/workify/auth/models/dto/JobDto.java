@@ -15,6 +15,8 @@ import java.util.List;
 public class JobDto {
     private String title;
     private String description;
+    private Integer minSalary;
+    private Integer maxSalary;
     private String employmentType;
     @ElementCollection
     private List<String> requiredSkills;

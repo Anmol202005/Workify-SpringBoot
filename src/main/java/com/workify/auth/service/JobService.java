@@ -47,6 +47,8 @@ public class JobService {
             job.setLocation(recruiterOptional.get().getCompanyLocation());
             job.setIndustry(recruiterOptional.get().getIndustry());
             job.setEmploymentType(jobDto.getEmploymentType());
+            job.setMaxSalary(jobDto.getMaxSalary());
+            job.setMinSalary(jobDto.getMinSalary());
             job.setRequiredSkills(jobDto.getRequiredSkills());
             return jobRepository.save(job);
         } else {

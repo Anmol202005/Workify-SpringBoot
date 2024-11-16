@@ -1,8 +1,10 @@
 package com.workify.auth.models.community;
 
+import com.workify.auth.models.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,13 +24,17 @@ public class Community {
 
     private String name;
     private String description;
-    private String createdBy;
+    private LocalDateTime creationDateTime;
+    private LocalDateTime updateDateTime;
+    @ManyToOne
+    @JoinColumn(name = "created_by_id")
+    private User createdBy;
 
     @OneToMany(mappedBy = "community", cascade = CascadeType.ALL)
     private List<ChatMessage> messages;
 
     @ElementCollection
-    private Set<String> members = new HashSet<>();
+    private Set<Long> members = new HashSet<>(); //(contain use id)
 
 }
 
