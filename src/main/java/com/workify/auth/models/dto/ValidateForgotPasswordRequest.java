@@ -1,4 +1,4 @@
-package com.workify.auth.models;
+package com.workify.auth.models.dto;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 

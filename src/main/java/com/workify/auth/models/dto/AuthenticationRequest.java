@@ -1,7 +1,6 @@
-package com.workify.auth.models;
+package com.workify.auth.models.dto;
 
 import lombok.*;
-import org.antlr.v4.runtime.misc.NotNull;
 
 @Data
 @Builder

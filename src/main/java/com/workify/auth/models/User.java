@@ -2,6 +2,7 @@ package com.workify.auth.models;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -34,18 +35,26 @@ public class User implements UserDetails {
     @Size(max = 20, message = "First name should not be more than 20 characters")
     private String firstName;
     private String lastName;
+    @JsonIgnore
     private String username;
     private String email;
     private String mobile;
+    @JsonIgnore
     private String password;
     @Enumerated(EnumType.STRING)
     @JsonBackReference
     private Role role;
+    @JsonIgnore
     private String otp;
+    @JsonIgnore
     private LocalDateTime otpGenerated;
+    @JsonIgnore
     private Boolean changepassOTP = false;
+    @JsonIgnore
     private Boolean verified;
+    @JsonIgnore
     private LocalDateTime resendOtpTimer;
+    @JsonIgnore
     private LocalDateTime registerRequestTimer;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -1,11 +1,8 @@
 package com.workify.auth.Controller;
 import com.workify.auth.models.Candidate;
-import com.workify.auth.models.Education;
-import com.workify.auth.models.ResponseMessage;
+import com.workify.auth.models.dto.ResponseMessage;
 import com.workify.auth.models.dto.CandidateDTO;
 import com.workify.auth.models.dto.GetResponse;
-import com.workify.auth.service.AuthService;
-import com.workify.auth.service.CandidateService;
 import com.workify.auth.service.CandidateService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;

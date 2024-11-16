@@ -1,22 +1,18 @@
 package com.workify.auth.Controller;
 
-import com.workify.auth.models.Job;
 import com.workify.auth.models.Recruiter;
-import com.workify.auth.models.ResponseMessage;
-import com.workify.auth.models.dto.JobDto;
+import com.workify.auth.models.dto.ResponseMessage;
 import com.workify.auth.models.dto.RecruiterDto;
 import com.workify.auth.service.RecruiterService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/recruiter")

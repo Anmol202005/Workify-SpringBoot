@@ -1,7 +1,6 @@
 package com.workify.auth.service;
 
-import com.workify.auth.models.ResponseMessage;
-import jakarta.mail.MessagingException;
+import com.workify.auth.models.dto.ResponseMessage;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

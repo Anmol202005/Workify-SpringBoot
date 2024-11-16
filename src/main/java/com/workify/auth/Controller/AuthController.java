@@ -1,6 +1,6 @@
 package com.workify.auth.Controller;
 
-import com.workify.auth.models.*;
+import com.workify.auth.models.dto.*;
 import com.workify.auth.service.AuthService;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;

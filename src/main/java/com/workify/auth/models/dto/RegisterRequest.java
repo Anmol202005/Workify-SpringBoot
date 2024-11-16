@@ -1,5 +1,6 @@
-package com.workify.auth.models;
+package com.workify.auth.models.dto;
 
+import com.workify.auth.models.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;

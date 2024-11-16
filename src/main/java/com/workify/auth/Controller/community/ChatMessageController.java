@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/communities/{communityId}/messages")
+@RequestMapping("/api/communities//messages")
 public class ChatMessageController {
 
     @Autowired

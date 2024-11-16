@@ -1,9 +1,19 @@
 package com.workify.auth.models;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
+@ToString
+@Builder
 @Entity
 @Table(name = "jobs")
 public class Job {
@@ -11,13 +21,20 @@ public class Job {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "recruiter_id", nullable = false)
-    private Recruiter recruiter;
-
     private String title;
     private String description;
+    private String company;
     private String location;
     private String industry;
     private String employmentType;
+    private LocalDateTime postedAt;
+
+    @ElementCollection
+    private List<String> requiredSkills;
+
+    @ManyToOne
+    @JoinColumn(name = "recruiter_id", nullable = false)
+    private Recruiter postedBy;
+
+
 }

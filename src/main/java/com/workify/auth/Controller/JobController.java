@@ -1,7 +1,9 @@
 package com.workify.auth.Controller;
 
 import com.workify.auth.models.Job;
+import com.workify.auth.models.JobApplication;
 import com.workify.auth.models.dto.JobDto;
+import com.workify.auth.models.dto.ResponseMessage;
 import com.workify.auth.service.JobService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +23,11 @@ public class JobController {
     }
 
     @PostMapping("/post")
-    public ResponseEntity<Job> postJob(@RequestBody JobDto jobDto, HttpServletRequest request) {
-        return ResponseEntity.ok(jobService.postJob(jobDto, request));
+    public ResponseEntity<ResponseMessage> postJob(@RequestBody JobDto jobDto, HttpServletRequest request) {
+        jobService.postJob(jobDto, request);
+        return ResponseEntity.ok(ResponseMessage.builder()
+                .message("Applied successfully")
+                .build());
     }
 
     @GetMapping("/filter/title")
@@ -34,9 +39,31 @@ public class JobController {
     public ResponseEntity<List<Job>> getJobsByLocation(@RequestParam String location) {
         return ResponseEntity.ok(jobService.getJobsByLocation(location));
     }
-
-    @GetMapping("/filter/industry")
-    public ResponseEntity<List<Job>> getJobsByIndustry(@RequestParam String industry) {
-        return ResponseEntity.ok(jobService.getJobsByIndustry(industry));
+    @PostMapping("apply/applications/{jobId}")
+    public ResponseEntity<ResponseMessage> getJob(@PathVariable long jobId,HttpServletRequest request) {
+        jobService.apply(jobId,request);
+        return ResponseEntity.ok(ResponseMessage.builder()
+                .message("Applied successfully")
+                .build());
     }
+    @GetMapping("/search")
+    public ResponseEntity<List<Job>> searchJobs(@RequestParam String search) {
+
+        return ResponseEntity.ok(jobService.searchJobs(search));
+    }
+
+    @GetMapping("/recruiter") //(jobs posted by recruiter)
+    public ResponseEntity<List<Job>> getJobsByRecruiter(HttpServletRequest request) {
+        return ResponseEntity.ok(jobService.jobsByRecruiter(request));
+    }
+
+    @GetMapping("/applications/candidate") //(applications applied by candidate)
+    public ResponseEntity<List<JobApplication>> getApplicationsByCandidate(HttpServletRequest request) {
+        return ResponseEntity.ok(jobService.applicationByCandidate(request));
+    }
+    @GetMapping("/applications/{jobId}")
+    public ResponseEntity<List<JobApplication>> getApplicationsForJob(@PathVariable Long jobId) {
+        return ResponseEntity.ok(jobService.applicationsForJob(jobId));
+    }
+
 }
