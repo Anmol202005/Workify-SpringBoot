@@ -18,4 +18,8 @@ public interface JobRepository extends JpaRepository<Job, Long> {
             "LOWER(skill) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Job> searchJobs(String keyword);
     List<Job> findByPostedById(Long recruiterId);
+    List<Job> findByMinSalaryGreaterThanEqualAndMaxSalaryLessThanEqual(Integer minSalary, Integer maxSalary);
+    List<Job> findByTitleContainingAndLocationContaining(String title, String location);
+    List<Job> findByTitleContainingAndLocationContainingAndMinSalaryGreaterThanEqualAndMaxSalaryLessThanEqual(String title, String location, Integer minSalary, Integer maxSalary);
+
 }

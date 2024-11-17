@@ -62,7 +62,21 @@ public class JobService {
     public List<Job> getJobsByLocation(String location) {
         return jobRepository.findByLocationContaining(location);
     }
-
+    public List<Job> filterJobs(String title, String location, Integer minSalary, Integer maxSalary) {
+        if (title != null && location != null && minSalary != null && maxSalary != null) {
+            return jobRepository.findByTitleContainingAndLocationContainingAndMinSalaryGreaterThanEqualAndMaxSalaryLessThanEqual(title, location, minSalary, maxSalary);
+        } else if (title != null && location != null) {
+            return jobRepository.findByTitleContainingAndLocationContaining(title, location);
+        } else if (title != null) {
+            return jobRepository.findByTitleContaining(title);
+        } else if (location != null) {
+            return jobRepository.findByLocationContaining(location);
+        } else if (minSalary != null && maxSalary != null) {
+            return jobRepository.findByMinSalaryGreaterThanEqualAndMaxSalaryLessThanEqual(minSalary, maxSalary);
+        } else {
+            return jobRepository.findAll();
+        }
+    }
 
     public void apply(long jobId, HttpServletRequest request) {
         final String authHeader = request.getHeader("Authorization");
