@@ -135,7 +135,12 @@ public class CandidateController {
                 .message("All certificates deleted successfully")
                 .build());
     }
-
+    @GetMapping("/filter")
+    public ResponseEntity<List<Candidate>> filterCandidates(@RequestParam(required = false) String skill,
+                                                            @RequestParam(required = false) String location,
+                                                            @RequestParam(required = false) Integer experience) {
+        return ResponseEntity.ok(candidateService.filterCandidates(skill, location, experience));
+    }
 
 }
 
