@@ -31,8 +31,8 @@ public class Candidate {
     private String skills;
 
 
-    private byte[] resume;
-    private byte[] profileImage;
+    private String resumeKey;
+    private String profileImageKey;
 
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "candidate")

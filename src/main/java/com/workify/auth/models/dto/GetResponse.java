@@ -20,6 +20,6 @@ public class GetResponse {
     private List<Experience> experience;
     private String skill;
     private List<Certificate> certificate;
-    private byte[] resume;
-    private byte[] profileImage;
+    private String resumeKey;
+    private String profileImageKey;
 }

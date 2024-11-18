@@ -20,6 +20,7 @@ public interface CertificateRepository extends JpaRepository<Certificate,Long > 
     void deleteByCandidateAndCertificateName(Candidate candidate, String certificateName);
     Boolean existsByCertificateName(String name);
     void deleteAllByCandidate(Candidate candidate);
+    Certificate findByCertificateNameAndCandidate(String certificateName, Candidate candidate);
 
 
 }

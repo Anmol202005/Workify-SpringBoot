@@ -20,9 +20,8 @@ public class Certificate {
     private Long id;
 
     private String certificateName;
+    private String fileKey;
 
-    @Column(name = "certificate_data")
-    private byte[] certificateData;
 
 
     @ManyToOne

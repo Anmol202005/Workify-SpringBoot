@@ -17,4 +17,7 @@ public interface ExperienceRepository extends JpaRepository<Experience,Long > {
     @Transactional
     @Query("DELETE FROM Experience c WHERE c.candidate = :candidate")
     void deleteByCandidate(Candidate candidate);
+
+    void deleteAllByCandidate(Candidate candidate);
 }
+
