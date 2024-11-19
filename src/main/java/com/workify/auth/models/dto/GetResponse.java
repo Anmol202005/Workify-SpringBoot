@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.net.URL;
+import java.time.LocalDate;
 import java.util.List;
 @Getter
 @Setter
@@ -18,8 +20,9 @@ public class GetResponse {
     private String phone;
     private List<Education> education;
     private List<Experience> experience;
-    private String skill;
+    private List<String> skill;
     private List<Certificate> certificate;
-    private String resumeKey;
-    private String profileImageKey;
+    private URL resumeKey;
+    private URL profileImageKey;
+    private LocalDate DOB;
 }

@@ -5,6 +5,8 @@ import com.workify.auth.models.dto.JobDto;
 import com.workify.auth.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -50,6 +52,13 @@ public class JobService {
             job.setMaxSalary(jobDto.getMaxSalary());
             job.setMinSalary(jobDto.getMinSalary());
             job.setRequiredSkills(jobDto.getRequiredSkills());
+            List<Candidate> candidates=candidateRepository.findCandidatesBySkills(jobDto.getRequiredSkills());
+            for (Candidate candidate : candidates) {
+                Notification notification = new Notification();
+                notification.setTitle(jobDto.getTitle());
+                notification.setMessage(jobDto.getDescription());
+                notification.setUser(candidate.getUser());
+            }
             return jobRepository.save(job);
         } else {
             throw new RuntimeException("Recruiter not found");
@@ -83,7 +92,13 @@ public class JobService {
         jobApplication.setApplicant(applicant);
         jobApplication.setAppliedAt(LocalDateTime.now());
         jobApplication.setStatus(ApplicationStatus.PENDING);
+        Recruiter recruiter = job.getPostedBy();
+        Notification notification = new Notification();
+        notification.setTitle("Applied for your Job");
+        notification.setMessage("Applied by "+applicant.getUser().getFirstName()+" "+applicant.getUser().getLastName());
+        notification.setUser(recruiter.getUser());
 
+        jobApplicationRepository.save(jobApplication);
     }
 
     public List<Job> searchJobs(String keyword) {
@@ -128,5 +143,21 @@ public class JobService {
     public List<JobApplication> applicationsForJob(Long jobId) {
         List<JobApplication> applications = jobApplicationRepository.findByJobId(jobId);
         return applications;
+    }
+
+    public void updateStatus(Long applicationId, ApplicationStatus status) {
+        JobApplication jobApplication = jobApplicationRepository.findById(applicationId).get();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        Optional<Recruiter> recruiter=recruiterRepository.findByUser(currentUser);
+        if(recruiter.isPresent()) {
+            if(jobApplication.getJob().getPostedBy()==recruiter.get()) {
+                jobApplication.setStatus(status);
+            }
+            else {
+                throw new RuntimeException("Permission denied");
+            }
+        }
+
     }
 }

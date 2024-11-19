@@ -1,5 +1,6 @@
 package com.workify.auth.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,6 +24,7 @@ public class Experience {
     private String position;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "candidate_id", nullable = false)
     private Candidate candidate;
 

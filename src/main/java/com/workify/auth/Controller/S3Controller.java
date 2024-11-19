@@ -46,7 +46,7 @@ public class S3Controller {
         }
     }
 
-    // Endpoint to generate the pre-signed URL for downloading a file
+
     @GetMapping("/download")
     public ResponseEntity<String> downloadFile(@RequestParam("fileKey") String fileKey) {
         try {
@@ -60,7 +60,7 @@ public class S3Controller {
     @GetMapping("/view")
     public ResponseEntity<String> viewFile(@RequestParam("fileKey") String fileKey) {
         try {
-            // Generate pre-signed URL for viewing (with inline display in browser)
+
             URL preSignedUrl = s3Service.generateViewPresignedUrl(fileKey);
             return ResponseEntity.ok("View URL: " + preSignedUrl.toString());
         } catch (Exception e) {

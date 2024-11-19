@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.net.URL;
+import java.time.LocalDate;
 import java.util.List;
 @Data
 @AllArgsConstructor
@@ -26,13 +28,12 @@ public class Candidate {
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     @JsonIgnore
     private User user;
+    @ElementCollection
+    private List<String> skills;
 
-
-    private String skills;
-
-
-    private String resumeKey;
-    private String profileImageKey;
+    private LocalDate DOB;
+    private URL resumeKey;
+    private URL profileImageKey;
 
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "candidate")

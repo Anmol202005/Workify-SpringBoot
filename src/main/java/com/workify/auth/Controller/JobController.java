@@ -1,5 +1,6 @@
 package com.workify.auth.Controller;
 
+import com.workify.auth.models.ApplicationStatus;
 import com.workify.auth.models.Job;
 import com.workify.auth.models.JobApplication;
 import com.workify.auth.models.dto.JobDto;
@@ -65,5 +66,11 @@ public class JobController {
     public ResponseEntity<List<JobApplication>> getApplicationsForJob(@PathVariable Long jobId) {
         return ResponseEntity.ok(jobService.applicationsForJob(jobId));
     }
-
+    @PostMapping("/application/update-status/{applicationId}")
+    public ResponseEntity<ResponseMessage> updateApplicationStatus(@PathVariable Long applicationId, @RequestBody ApplicationStatus status) {
+        jobService.updateStatus(applicationId,status);
+        return ResponseEntity.ok(ResponseMessage.builder()
+                .message("Status updated successfully")
+                .build());
+    }
 }

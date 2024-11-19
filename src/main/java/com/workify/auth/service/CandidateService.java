@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -62,6 +63,7 @@ public class CandidateService {
             GetResponse getResponse = new GetResponse();
             getResponse.setFirstName(candidate.getUser().getFirstName());
             getResponse.setLastName(candidate.getUser().getLastName());
+            getResponse.setDOB(candidate.getDOB());
             getResponse.setEmail(candidate.getUser().getEmail());
             getResponse.setPhone(candidate.getUser().getMobile());
             getResponse.setEducation(candidate.getEducation());
@@ -84,6 +86,7 @@ public class CandidateService {
         GetResponse getResponse = new GetResponse();
         getResponse.setFirstName(candidate.getUser().getFirstName());
         getResponse.setLastName(candidate.getUser().getLastName());
+        getResponse.setDOB(candidate.getDOB());
         getResponse.setEmail(candidate.getUser().getEmail());
         getResponse.setPhone(candidate.getUser().getMobile());
         getResponse.setEducation(candidate.getEducation());
@@ -107,6 +110,7 @@ public class CandidateService {
         var candidate = candidateRepository.findByUser(user);
 
         candidate.setSkills(candidateDTO.getSkill());
+        candidate.setDOB(candidateDTO.getDOB());
 
         // Update Education
         List<Education> newEducations = candidateDTO.getEducations();
@@ -161,6 +165,7 @@ public class CandidateService {
     private Candidate convertDTOToCandidate(CandidateDTO candidateDTO, Optional<User> user) throws IOException {
         Candidate candidate = new Candidate();
         candidate.setSkills(candidateDTO.getSkill());
+        candidate.setDOB(candidateDTO.getDOB());
         candidate.setUser(user.orElse(null));
         List<Education> educations = candidateDTO.getEducations();
         if (educations != null) {
@@ -195,7 +200,7 @@ public class CandidateService {
             throw new RuntimeException("Only PDF files are supported");
         }
 
-        // Validate file size
+
         if (certificateFile.getSize() > MAX_CERTIFICATE_SIZE) {
             throw new RuntimeException("File size exceeds the maximum limit of 5 MB.");
         }
@@ -207,19 +212,24 @@ public class CandidateService {
 
         String fileName = "certificates"+user.get().getId() + "/" + certificateFile.getOriginalFilename();
 
-        // Upload file to S3
-        amazonS3.putObject(new PutObjectRequest(bucketName, fileName, certificateFile.getInputStream(), null)
-                .withCannedAcl(CannedAccessControlList.Private));
+
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentType(certificateFile.getContentType()); // Use the MIME type from the uploaded file
+        metadata.setContentLength(certificateFile.getSize());
+
+
+        amazonS3.putObject(bucketName, fileName, certificateFile.getInputStream(), metadata);
 
         Certificate certificate = Certificate.builder()
                 .certificateName(certificateName)
                 .candidate(candidateRepository.findByUser(user))
-                .fileKey(fileName)
+                .fileKey(new URL("https://anmol-workify-private.s3.ap-south-1.amazonaws.com/"
+                        + fileName.replace(" ", "+")))
                 .build();
            certificateRepository.save(certificate);
     }
 
-    public void saveResume(MultipartFile resume, HttpServletRequest request) throws IOException {
+    public void saveResume(MultipartFile resume, HttpServletRequest request) throws Exception {
 
         final String authHeader = request.getHeader("Authorization");
         final String username;
@@ -237,20 +247,25 @@ public class CandidateService {
             throw new RuntimeException("File size exceeds the maximum limit of 5 MB.");
         }
         if(candidate.getResumeKey()!=null) {
-            amazonS3.deleteObject(bucketName, candidate.getResumeKey());
+            amazonS3.deleteObject(bucketName,getKeyFromUrl(candidate.getResumeKey().toString()));
 
         }
         String fileName = "resume"+user.get().getId() + "/" + resume.getOriginalFilename();
 
         // Upload file to S3
-        amazonS3.putObject(new PutObjectRequest(bucketName, fileName, resume.getInputStream(), null)
-                .withCannedAcl(CannedAccessControlList.Private));
-        candidate.setResumeKey(fileName);
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentType(resume.getContentType()); // Use the MIME type from the uploaded file
+        metadata.setContentLength(resume.getSize());
+
+
+        amazonS3.putObject(bucketName, fileName, resume.getInputStream(), metadata);
+
+        candidate.setResumeKey(new URL("https://anmol-workify-private.s3.ap-south-1.amazonaws.com/"+fileName.replace(" ", "+")));
         candidateRepository.save(candidate);
 
     }
 
-    public void deleteCertificate(String certificateName, HttpServletRequest request) {
+    public void deleteCertificate(String certificateName, HttpServletRequest request) throws Exception {
         final String authHeader = request.getHeader("Authorization");
         final String username;
         String token = authHeader.replace("Bearer ", "");
@@ -262,11 +277,11 @@ public class CandidateService {
             throw new RuntimeException("Certificate with name " + certificateName + " does not exist");
         }
         Certificate certi=certificateRepository.findByCertificateNameAndCandidate(certificateName, candidate);
-        amazonS3.deleteObject(bucketName, certi.getFileKey());
+        amazonS3.deleteObject(bucketName, getKeyFromUrl(certi.getFileKey().toString()));
         certificateRepository.deleteByCandidateAndCertificateName(candidate, certificateName);
     }
 
-    public void deleteResume(HttpServletRequest request) {
+    public void deleteResume(HttpServletRequest request) throws Exception {
         final String authHeader = request.getHeader("Authorization");
         final String username;
         String token = authHeader.replace("Bearer ", "");
@@ -274,12 +289,12 @@ public class CandidateService {
 
         Optional<User> user= userRepository.findByUsername(username);
         var candidate = candidateRepository.findByUser(user);
-        amazonS3.deleteObject(bucketName, candidate.getResumeKey());
+        amazonS3.deleteObject(bucketName, getKeyFromUrl(candidate.getResumeKey().toString()));
         candidate.setResumeKey(null);
         candidateRepository.save(candidate);
     }
 
-    public void saveProfilePicture(MultipartFile image, HttpServletRequest request) throws IOException {
+    public void saveProfilePicture(MultipartFile image, HttpServletRequest request) throws Exception {
 
         final String authHeader = request.getHeader("Authorization");
         final String username;
@@ -298,15 +313,20 @@ public class CandidateService {
             throw new RuntimeException("File size exceeds the maximum limit of 2 MB.");
         }
         if(candidate.getProfileImageKey()!=null) {
-            amazonS3.deleteObject(bucketName, candidate.getProfileImageKey());
+            amazonS3.deleteObject(bucketName, getKeyFromUrl(candidate.getProfileImageKey().toString()));
 
         }
         String fileName = "profilepic"+user.get().getId() + "/" + image.getOriginalFilename();
 
         // Upload file to S3
-        amazonS3.putObject(new PutObjectRequest(bucketName, fileName, image.getInputStream(), null)
-                .withCannedAcl(CannedAccessControlList.Private));
-        candidate.setProfileImageKey(fileName);
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentType(image.getContentType()); // Use the MIME type from the uploaded file
+        metadata.setContentLength(image.getSize());
+
+
+        amazonS3.putObject(bucketName, fileName, image.getInputStream(), metadata);
+
+        candidate.setProfileImageKey(new URL("https://anmol-workify-private.s3.ap-south-1.amazonaws.com/"+fileName.replace(" ", "+")));
         candidateRepository.save(candidate);
 
     }
@@ -345,6 +365,19 @@ public class CandidateService {
                 contentType.equals("image/png") ||
                         contentType.equals("image/jpeg") ||
                         contentType.equals("image/jpg")
-        );}
-}
+        );
+
+    }
+    public static String getKeyFromUrl(String s3Url) throws Exception {
+        // Parse the URL
+        URL url = new URL(s3Url);
+
+        // Extract the path from the URL
+        String path = url.getPath();
+
+        // Remove the leading '/' from the path to get the key
+        return path.startsWith("/") ? path.substring(1) : path;
+    }}
+
+
 

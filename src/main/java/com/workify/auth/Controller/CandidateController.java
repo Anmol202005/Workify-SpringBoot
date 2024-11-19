@@ -83,7 +83,7 @@ public class CandidateController {
     public ResponseEntity<ResponseMessage> uploadResume(
             @RequestParam("Resume") MultipartFile resume,
             HttpServletRequest request
-    ) throws IOException {
+    ) throws Exception {
 
 
         candidateService.saveResume(resume,request);
@@ -93,7 +93,7 @@ public class CandidateController {
                 .build());
     }
     @DeleteMapping("/delete-certificate/{certificateName}")
-    public ResponseEntity<ResponseMessage> deleteCertificate(@PathVariable String certificateName,HttpServletRequest request) {
+    public ResponseEntity<ResponseMessage> deleteCertificate(@PathVariable String certificateName,HttpServletRequest request) throws Exception {
         candidateService.deleteCertificate(certificateName,request);
 
         return ResponseEntity.ok(ResponseMessage.builder()
@@ -101,7 +101,7 @@ public class CandidateController {
                 .build());
     }
     @DeleteMapping("/delete-resume")
-    public ResponseEntity<ResponseMessage> deleteResume(HttpServletRequest request) {
+    public ResponseEntity<ResponseMessage> deleteResume(HttpServletRequest request) throws Exception {
         candidateService.deleteResume(request);
 
         return ResponseEntity.ok(ResponseMessage.builder()
@@ -112,7 +112,7 @@ public class CandidateController {
     public ResponseEntity<ResponseMessage> uploadProfilePicture(
             @RequestParam("image") MultipartFile image,
             HttpServletRequest request
-    ) throws IOException {
+    ) throws Exception {
 
 
         candidateService.saveProfilePicture(image,request);

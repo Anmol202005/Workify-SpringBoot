@@ -1,6 +1,7 @@
 package com.workify.auth.models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,6 +25,7 @@ public class Education {
     private Integer yearOfCompletion;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "candidate_id", nullable = false)
     private Candidate candidate;
 

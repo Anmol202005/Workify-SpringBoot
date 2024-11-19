@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -16,6 +17,6 @@ import java.util.List;
 public class CandidateDTO {
     private List<Education> educations;
     private List<Experience> experiences;
-    private String skill;
-
+    private List<String> skill;
+    private LocalDate DOB;
 }
