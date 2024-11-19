@@ -13,6 +13,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,12 +37,10 @@ public class RecruiterService {
 
 
     public Recruiter createRecruiter(RecruiterDto recruiterdto, HttpServletRequest request) {
-        final String authHeader = request.getHeader("Authorization");
-        final String username;
-        String token = authHeader.replace("Bearer ", "");
-        username = Jwtservice.extractusername(token);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User username = (User) authentication.getPrincipal();
 
-        Optional<User> user = userRepository.findByUsername(username);
+        Optional<User> user = userRepository.findByUser(username);
         if (user.isPresent()) {
             Recruiter recruiter = convertDtoToRecruiter(recruiterdto, user);
             user.get().setRole(Role.RECRUITER);
@@ -56,12 +56,11 @@ public class RecruiterService {
     }
 
     public Recruiter updateRecruiterProfile(RecruiterDto recruiter,HttpServletRequest request) {
-        final String authHeader = request.getHeader("Authorization");
-        final String username;
-        String token = authHeader.replace("Bearer ", "");
-        username = Jwtservice.extractusername(token);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User username = (User) authentication.getPrincipal();
 
-        Optional<User> user = userRepository.findByUsername(username);
+
+        Optional<User> user = userRepository.findByUser(username);
         Optional<Recruiter> recruiterOptional = recruiterRepository.findByUser(user.get());
         if (recruiterOptional.isPresent()) {
             return updateRecruiterFields(recruiterOptional.get().getId(), recruiter);
@@ -71,12 +70,11 @@ public class RecruiterService {
     }
 
     public void deleteRecruiterProfile(HttpServletRequest id) {
-        final String authHeader = id.getHeader("Authorization");
-        final String username;
-        String token = authHeader.replace("Bearer ", "");
-        username = Jwtservice.extractusername(token);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User username = (User) authentication.getPrincipal();
 
-        Optional<User> user = userRepository.findByUsername(username);
+
+        Optional<User> user = userRepository.findByUser(username);
         Optional<Recruiter> recruiter = recruiterRepository.findByUser(user.get());
         if (recruiter.isPresent()) {
             recruiterRepository.delete(recruiter.get());
@@ -126,12 +124,11 @@ public class RecruiterService {
     }
     public void saveProfilePicture(MultipartFile image, HttpServletRequest id) throws IOException {
         byte[] imageData = image.getBytes();
-        final String authHeader = id.getHeader("Authorization");
-        final String username;
-        String token = authHeader.replace("Bearer ", "");
-        username = Jwtservice.extractusername(token);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User username = (User) authentication.getPrincipal();
 
-        Optional<User> userOptional = userRepository.findByUsername(username);
+
+        Optional<User> userOptional = userRepository.findByUser(username);
 
             User user = userOptional.get();
             Optional<Recruiter> recruiterOptional = recruiterRepository.findByUser(user);
