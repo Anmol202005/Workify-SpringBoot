@@ -114,26 +114,18 @@ public class CandidateService {
 
         return candidateRepository.save(candidate);
     }
-    public List<Candidate> filterCandidates(String skill, String location, Integer experience) {
-        if (skill != null && location != null && experience != null) {
-            return candidateRepository.findBySkillsContainingAndLocationContainingAndExperienceGreaterThanEqual(skill, location, experience);
-        } else if (skill != null && location != null) {
-            return candidateRepository.findBySkillsContainingAndLocationContaining(skill, location);
-        } else if (skill != null && experience != null) {
-            return candidateRepository.findBySkillsContainingAndExperienceGreaterThanEqual(skill, experience);
-        } else if (location != null && experience != null) {
-            return candidateRepository.findByLocationContainingAndExperienceGreaterThanEqual(location, experience);
-        } else if (skill != null) {
-            return candidateRepository.findBySkillsContaining(skill);
-        } else if (location != null) {
-            return candidateRepository.findByLocationContaining(location);
-        } else if (experience != null) {
-            return candidateRepository.findByExperienceGreaterThanEqual(experience);
-        } else {
-            return candidateRepository.findAll();
-        }
-    }
-
+//    public List<Candidate> filterCandidates(String skill, Integer experiences) {
+//        if (skill != null && experiences != null) {
+//            return candidateRepository.findBySkillsContainingAndExperiencesGreaterThanEqual(skill, experiences);
+//        } else if (experiences != null) {
+//            return candidateRepository.findByExperiencesGreaterThanEqual( experiences);
+//        } else if (skill != null) {
+//            return candidateRepository.findBySkillsContaining(skill);
+//        } else {
+//            return candidateRepository.findAll();
+//        }
+//    }
+//
 
 
     public void deleteCandidate(HttpServletRequest request) {

@@ -2,14 +2,21 @@ package com.workify.auth.service;
 
 import com.workify.auth.models.*;
 import com.workify.auth.models.dto.JobDto;
+import com.workify.auth.models.dto.JobResponseDto;
 import com.workify.auth.repository.*;
+import jakarta.persistence.criteria.Join;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+//import java.util.function.Predicate;
+import jakarta.persistence.criteria.Predicate;
 
 @Service
 public class JobService {
@@ -49,7 +56,9 @@ public class JobService {
             job.setEmploymentType(jobDto.getEmploymentType());
             job.setMaxSalary(jobDto.getMaxSalary());
             job.setMinSalary(jobDto.getMinSalary());
+            job.setLocation(jobDto.getLocation());
             job.setRequiredSkills(jobDto.getRequiredSkills());
+            job.setExperience(jobDto.getExperience());
             return jobRepository.save(job);
         } else {
             throw new RuntimeException("Recruiter not found");
@@ -62,22 +71,66 @@ public class JobService {
     public List<Job> getJobsByLocation(String location) {
         return jobRepository.findByLocationContaining(location);
     }
-    public List<Job> filterJobs(String title, String location, Integer minSalary, Integer maxSalary) {
-        if (title != null && location != null && minSalary != null && maxSalary != null) {
-            return jobRepository.findByTitleContainingAndLocationContainingAndMinSalaryGreaterThanEqualAndMaxSalaryLessThanEqual(title, location, minSalary, maxSalary);
-        } else if (title != null && location != null) {
-            return jobRepository.findByTitleContainingAndLocationContaining(title, location);
-        } else if (title != null) {
-            return jobRepository.findByTitleContaining(title);
-        } else if (location != null) {
-            return jobRepository.findByLocationContaining(location);
-        } else if (minSalary != null && maxSalary != null) {
-            return jobRepository.findByMinSalaryGreaterThanEqualAndMaxSalaryLessThanEqual(minSalary, maxSalary);
-        } else {
-            return jobRepository.findAll();
+
+    public List<JobResponseDto> filterJobs(String title, String location, Integer minSalary, Integer maxSalary, Integer experience, String employmentType, List<String> requiredSkills) {
+        Specification<Job> spec = (root, query, criteriaBuilder) -> {
+            Predicate predicate = criteriaBuilder.conjunction();
+            if(title != null){
+                predicate = criteriaBuilder.and(predicate,
+                        criteriaBuilder.like(root.get("title"), "%" + title + "%"));
+            }
+            if(location != null){
+                predicate = criteriaBuilder.and(predicate,
+                        criteriaBuilder.like(root.get("location"), "%" + location + "%"));
+            }
+            if(minSalary != null){
+                predicate = criteriaBuilder.and(predicate,
+                        criteriaBuilder.greaterThanOrEqualTo(root.get("minSalary"), minSalary));
+            }
+            if(maxSalary != null){
+                predicate = criteriaBuilder.and(predicate,
+                        criteriaBuilder.lessThanOrEqualTo(root.get("maxSalary"), maxSalary));
+            }
+            if(experience != null){
+                predicate = criteriaBuilder.and(predicate,
+                        criteriaBuilder.lessThanOrEqualTo(root.get("experience"), experience));
+            }
+            if(employmentType != null){
+                predicate = criteriaBuilder.and(predicate,
+                        criteriaBuilder.equal(root.get("employmentType"), employmentType));
+            }
+            if(requiredSkills != null && !requiredSkills.isEmpty()){
+                Join<Job, String> skillsJoin = root.join("requiredSkills");
+                List<String> lowerCaseSkills = requiredSkills.stream()
+                        .map(String::toLowerCase)
+                        .collect(Collectors.toList());
+                predicate = criteriaBuilder.and(predicate,
+                        criteriaBuilder.lower(skillsJoin).in(lowerCaseSkills));
+            }
+            return predicate;
+        };
+        List<Job> filteredJobs = jobRepository.findAll(spec);
+        if(filteredJobs.isEmpty()){
+            throw new RuntimeException("No Jobs Found");
+        }
+        else {
+            return filteredJobs.stream()
+                    .map(this::mapToResponseDto)
+                    .collect(Collectors.toList());
         }
     }
-
+    private JobResponseDto mapToResponseDto(Job job) {
+        return new JobResponseDto(
+                job.getTitle(),
+                job.getDescription(),
+                job.getLocation(),
+                job.getExperience(),
+                job.getMinSalary(),
+                job.getMaxSalary(),
+                job.getEmploymentType(),
+                new ArrayList<>(job.getRequiredSkills())
+        );
+    }
     public void apply(long jobId, HttpServletRequest request) {
         final String authHeader = request.getHeader("Authorization");
         final String username;

@@ -25,6 +25,7 @@ public class Job {
     private String description;
     private String company;
     private String location;
+    private Integer experience;
     private String industry;
     private String employmentType;
     private LocalDateTime postedAt;

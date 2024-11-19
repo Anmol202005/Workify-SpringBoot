@@ -17,5 +17,4 @@ public class CandidateDTO {
     private List<Education> educations;
     private List<Experience> experiences;
     private String skill;
-
 }

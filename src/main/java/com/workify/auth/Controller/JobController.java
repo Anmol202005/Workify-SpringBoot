@@ -3,6 +3,7 @@ package com.workify.auth.Controller;
 import com.workify.auth.models.Job;
 import com.workify.auth.models.JobApplication;
 import com.workify.auth.models.dto.JobDto;
+import com.workify.auth.models.dto.JobResponseDto;
 import com.workify.auth.models.dto.ResponseMessage;
 import com.workify.auth.service.JobService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +27,7 @@ public class JobController {
     public ResponseEntity<ResponseMessage> postJob(@RequestBody JobDto jobDto, HttpServletRequest request) {
         jobService.postJob(jobDto, request);
         return ResponseEntity.ok(ResponseMessage.builder()
-                .message("Applied successfully")
+                .message("Job Posted Successfully")
                 .build());
     }
 
@@ -39,12 +40,16 @@ public class JobController {
     public ResponseEntity<List<Job>> getJobsByLocation(@RequestParam String location) {
         return ResponseEntity.ok(jobService.getJobsByLocation(location));
     }
+
     @GetMapping("/filter")
-    public ResponseEntity<List<Job>> filterJobs(@RequestParam(required = false) String title,
-                                                @RequestParam(required = false) String location,
-                                                @RequestParam(required = false) Integer minSalary,
-                                                @RequestParam(required = false) Integer maxSalary) {
-        return ResponseEntity.ok(jobService.filterJobs(title, location, minSalary, maxSalary));
+    public ResponseEntity<List<JobResponseDto>> filterJobs(@RequestParam(required = false) String title,
+                                                           @RequestParam(required = false) String location,
+                                                           @RequestParam(required = false) Integer experience,
+                                                           @RequestParam(required = false) Integer minSalary,
+                                                           @RequestParam(required = false) Integer maxSalary,
+                                                           @RequestParam(required = false) String employmentType,
+                                                           @RequestParam(required = false) List<String> requiredSkills){
+        return ResponseEntity.ok(jobService.filterJobs(title, location, minSalary, maxSalary, experience, employmentType, requiredSkills));
     }
     @PostMapping("apply/applications/{jobId}")
     public ResponseEntity<ResponseMessage> getJob(@PathVariable long jobId,HttpServletRequest request) {
@@ -58,8 +63,7 @@ public class JobController {
 
         return ResponseEntity.ok(jobService.searchJobs(search));
     }
-
-    @GetMapping("/recruiter") //(jobs posted by recruiter)
+    @GetMapping("/recruiter")
     public ResponseEntity<List<Job>> getJobsByRecruiter(HttpServletRequest request) {
         return ResponseEntity.ok(jobService.jobsByRecruiter(request));
     }
