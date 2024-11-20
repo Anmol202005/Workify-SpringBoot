@@ -14,5 +14,6 @@ public interface CandidateRepository extends JpaRepository<Candidate,Long >  {
     @Query("SELECT DISTINCT c FROM Candidate c JOIN c.skills skill " +
             "WHERE LOWER(skill) IN :keywords")
     List<Candidate> findCandidatesBySkills(@Param("keywords") List<String> keywords);
+    Boolean existsByUser(Optional<User> user);
 
 }

@@ -158,6 +158,9 @@ public class CandidateService {
         username=Jwtservice.extractusername(token);
 
         Optional<User> user= userRepository.findByUsername(username);
+        if(candidateRepository.existsByUser(user)) {
+            throw new RuntimeException("Candidate with Email " + username + " already exists");
+        }
         return convertDTOToCandidate(candidateDTO, user);
 
     }
