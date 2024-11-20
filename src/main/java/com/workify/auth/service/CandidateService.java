@@ -29,7 +29,7 @@ public class CandidateService {
     private static final long MAX_CERTIFICATE_SIZE = 5 * 1024 * 1024; // 5 MB
 
     private final AmazonS3 amazonS3;
-    @Value("${aws.s3.bucket-name}")
+    @Value("${aws_bucket_name}")
     private String bucketName;
 
     @Autowired

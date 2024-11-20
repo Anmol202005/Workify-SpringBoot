@@ -19,7 +19,7 @@ public class S3Service {
     private final AmazonS3 amazonS3;
 
     // Injecting S3 bucket name from application.properties or application.yml
-    @Value("${aws.s3.bucket-name}")
+    @Value("${aws_bucket_name}")
     private String bucketName;
 
     public S3Service(AmazonS3 amazonS3) {
