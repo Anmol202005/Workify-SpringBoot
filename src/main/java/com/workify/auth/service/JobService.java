@@ -8,8 +8,6 @@ import jakarta.persistence.criteria.Join;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -38,11 +36,12 @@ public class JobService {
     }
 
     public Job postJob(JobDto jobDto, HttpServletRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User username = (User) authentication.getPrincipal();
+        final String authHeader = request.getHeader("Authorization");
+        final String username;
+        String token = authHeader.replace("Bearer ", "");
+        username = Jwtservice.extractusername(token);
 
-
-        Optional<User> user = userRepository.findByUser(username);
+        Optional<User> user = userRepository.findByUsername(username);
         Optional<Recruiter> recruiterOptional = recruiterRepository.findByUser(user.get());
 
         if (recruiterOptional.isPresent()) {
@@ -133,11 +132,12 @@ public class JobService {
         );
     }
     public void apply(long jobId, HttpServletRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User username = (User) authentication.getPrincipal();
+        final String authHeader = request.getHeader("Authorization");
+        final String username;
+        String token = authHeader.replace("Bearer ", "");
+        username = Jwtservice.extractusername(token);
 
-
-        Optional<User> user = userRepository.findByUser(username);
+        Optional<User> user = userRepository.findByUsername(username);
         if(user.isPresent() && !user.get().getRole().equals(Role.CANDIDATE)) {
             throw new RuntimeException("Recuiter Can't apply for Jobs");
         }
@@ -159,28 +159,30 @@ public class JobService {
     }
 
     public List<Job> jobsByRecruiter(HttpServletRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User username = (User) authentication.getPrincipal();
+        final String authHeader = request.getHeader("Authorization");
+        final String username;
+        String token = authHeader.replace("Bearer ", "");
+        username = Jwtservice.extractusername(token);
 
-
-        Optional<User> user = userRepository.findByUser(username);
+        Optional<User> user = userRepository.findByUsername(username);
         if(user.isPresent() && user.get().getRole().equals(Role.CANDIDATE)) {
             throw new RuntimeException("Invalid User (only recuiters allowed)");
         }
         Optional<Recruiter> recruiterOptional = recruiterRepository.findByUser(user.get());
         Recruiter recruiter = recruiterOptional.get();
 
-            List<Job> jobs = jobRepository.findByPostedById(recruiter.getId());
-            return jobs;
+        List<Job> jobs = jobRepository.findByPostedById(recruiter.getId());
+        return jobs;
 
     }
 
     public List<JobApplication> applicationByCandidate(HttpServletRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User username = (User) authentication.getPrincipal();
+        final String authHeader = request.getHeader("Authorization");
+        final String username;
+        String token = authHeader.replace("Bearer ", "");
+        username = Jwtservice.extractusername(token);
 
-
-        Optional<User> user = userRepository.findByUser(username);
+        Optional<User> user = userRepository.findByUsername(username);
         if(user.isPresent() && !user.get().getRole().equals(Role.CANDIDATE)) {
             throw new RuntimeException("Invalid User (only candidates allowed)");
         }

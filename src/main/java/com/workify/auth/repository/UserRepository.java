@@ -14,11 +14,9 @@ public interface UserRepository extends JpaRepository<User,Long > {
     Optional<User> findByUsernameAndVerified(String username, boolean verified);
     Optional<User> findByEmailAndVerified(String email, boolean verified);
     Optional<User> findByMobileAndVerified(String mobile, boolean verified);
-   // List<User> findByUniqueUser(String username);
+    // List<User> findByUniqueUser(String username);
     boolean existsByMobile(String mobile);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
     boolean existsByUsernameAndVerified(String username, boolean verified);
-
-    Optional<User> findByUser(User username);
 }
