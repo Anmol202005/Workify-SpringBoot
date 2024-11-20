@@ -122,7 +122,7 @@ public class CandidateController {
                 .build());
     }
     @DeleteMapping("/certificate/{id}")
-    public ResponseEntity<ResponseMessage> deleteCertificateById(@PathVariable Long id) {
+    public ResponseEntity<ResponseMessage> deleteCertificateById(@PathVariable Long id) throws Exception {
         candidateService.deleteCertificateById(id);
         return ResponseEntity.ok(ResponseMessage.builder()
                 .message("Certificate deleted successfully")
@@ -134,6 +134,10 @@ public class CandidateController {
         return ResponseEntity.ok(ResponseMessage.builder()
                 .message("All certificates deleted successfully")
                 .build());
+    }
+    @GetMapping("/get-current")
+    public ResponseEntity<GetResponse> getCurrentCandidate() {
+        return ResponseEntity.ok(candidateService.getCurrentUser());
     }
 
 

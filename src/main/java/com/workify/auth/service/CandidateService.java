@@ -12,6 +12,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,11 +49,12 @@ public class CandidateService {
         this.amazonS3 = amazonS3;
     }
 
-    public  void deleteCertificateById(Long certificateId) {
+    public  void deleteCertificateById(Long certificateId) throws Exception {
 
         if (!certificateRepository.existsById(certificateId)) {
             throw new RuntimeException("Certificate with ID " + certificateId + " does not exist");
         }
+        amazonS3.deleteObject(bucketName, getKeyFromUrl(certificateRepository.findById(certificateId).get().getFileKey().toString()));
         certificateRepository.deleteById(certificateId);
     }
 
@@ -380,7 +383,28 @@ public class CandidateService {
 
         // Remove the leading '/' from the path to get the key
         return path.startsWith("/") ? path.substring(1) : path;
-    }}
+    }
+
+    public GetResponse getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        var currentUser = (User) authentication.getPrincipal();
+        Candidate candidate=candidateRepository.findByUser(Optional.ofNullable(currentUser));
+        GetResponse getResponse = new GetResponse();
+        getResponse.setFirstName(candidate.getUser().getFirstName());
+        getResponse.setLastName(candidate.getUser().getLastName());
+        getResponse.setDOB(candidate.getDOB());
+        getResponse.setEmail(candidate.getUser().getEmail());
+        getResponse.setPhone(candidate.getUser().getMobile());
+        getResponse.setEducation(candidate.getEducation());
+        getResponse.setExperience(candidate.getExperiences());
+        getResponse.setSkill(candidate.getSkills());
+        getResponse.setCertificate(candidate.getCertificates());
+        getResponse.setResumeKey(candidate.getResumeKey());
+        getResponse.setProfileImageKey(candidate.getProfileImageKey());
+
+        return getResponse;
+    }
+}
 
 
 
