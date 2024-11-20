@@ -137,7 +137,7 @@ public class CandidateService {
 
 
 
-
+@Transactional
     public void deleteCandidate(HttpServletRequest request) {
         final String authHeader = request.getHeader("Authorization");
         final String username;
@@ -267,7 +267,7 @@ public class CandidateService {
         candidateRepository.save(candidate);
 
     }
-
+@Transactional
     public void deleteCertificate(String certificateName, HttpServletRequest request) throws Exception {
         final String authHeader = request.getHeader("Authorization");
         final String username;
@@ -283,7 +283,7 @@ public class CandidateService {
         amazonS3.deleteObject(bucketName, getKeyFromUrl(certi.getFileKey().toString()));
         certificateRepository.deleteByCandidateAndCertificateName(candidate, certificateName);
     }
-
+@Transactional
     public void deleteResume(HttpServletRequest request) throws Exception {
         final String authHeader = request.getHeader("Authorization");
         final String username;

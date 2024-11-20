@@ -8,6 +8,7 @@ import com.workify.auth.repository.community.CommunityRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,6 +51,7 @@ public class CommunityService {
             throw new RuntimeException("Community not found");
         }
     }
+    @Transactional
     public void deleteCommunityById(Long id) {
         if(communityRepository.existsById(id)) {
             communityRepository.deleteById(id);}

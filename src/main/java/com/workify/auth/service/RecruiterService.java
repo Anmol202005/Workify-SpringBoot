@@ -10,6 +10,7 @@ import com.workify.auth.repository.JobRepository;
 import com.workify.auth.repository.RecruiterRepository;
 import com.workify.auth.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -69,7 +70,7 @@ public class RecruiterService {
             throw new RuntimeException("Recruiter not found");
         }
     }
-
+@Transactional
     public void deleteRecruiterProfile(HttpServletRequest id) {
         final String authHeader = id.getHeader("Authorization");
         final String username;
