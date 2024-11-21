@@ -6,6 +6,8 @@ import com.workify.auth.models.Job;
 import com.workify.auth.models.Recruiter;
 import com.workify.auth.models.Role;
 import com.workify.auth.models.User;
+import com.workify.auth.models.dto.GetResponse;
+import com.workify.auth.models.dto.GetResponseRecruiter;
 import com.workify.auth.models.dto.JobDto;
 import com.workify.auth.models.dto.RecruiterDto;
 import com.workify.auth.repository.JobRepository;
@@ -17,12 +19,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RecruiterService {
@@ -82,6 +88,23 @@ public class RecruiterService {
         }
     }
 @Transactional
+public List<RecruiterDto> getAllRecruitersDto(Pageable pageable) {
+    Page<Recruiter> recruiters = recruiterRepository.findAll(pageable);
+    return recruiters.stream()
+            .map(this::convertRecruiterToDto)
+            .collect(Collectors.toList());
+}
+
+private RecruiterDto convertRecruiterToDto(Recruiter recruiter) {
+    RecruiterDto dto = new RecruiterDto();
+    dto.setCompanyEmail(recruiter.getCompanyEmail());
+    dto.setCompanyName(recruiter.getCompanyName());
+    dto.setJobTitle(recruiter.getJobTitle());
+    dto.setCompanyWebsite(recruiter.getCompanyWebsite());
+    dto.setCompanyLocation(recruiter.getCompanyLocation());
+    dto.setIndustry(recruiter.getIndustry());
+    return dto;
+}
     public void deleteRecruiterProfile(HttpServletRequest id) {
         final String authHeader = id.getHeader("Authorization");
         final String username;
@@ -201,5 +224,24 @@ public class RecruiterService {
                         contentType.equals("image/jpg")
         );
 
+    }
+
+    public GetResponseRecruiter getCurrentRecruiter() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        var currentUser = (User) authentication.getPrincipal();
+        Recruiter recruiter=recruiterRepository.findByUser(currentUser).get();
+        GetResponseRecruiter getResponseRecruiter = new GetResponseRecruiter();
+        getResponseRecruiter.setCompanyEmail(recruiter.getCompanyEmail());
+        getResponseRecruiter.setCompanyName(recruiter.getCompanyName());
+        getResponseRecruiter.setCompanyLocation(recruiter.getCompanyLocation());
+        getResponseRecruiter.setCompanyWebsite(recruiter.getCompanyWebsite());
+        getResponseRecruiter.setIndustry(recruiter.getIndustry());
+        getResponseRecruiter.setJobTitle(recruiter.getJobTitle());
+        getResponseRecruiter.setFirstName(recruiter.getUser().getFirstName());
+        getResponseRecruiter.setLastName(recruiter.getUser().getLastName());
+        getResponseRecruiter.setEmail(recruiter.getUser().getEmail());
+        getResponseRecruiter.setPhone(recruiter.getUser().getMobile());
+        getResponseRecruiter.setProfileImage(recruiter.getProfileImage());
+        return getResponseRecruiter;
     }
 }

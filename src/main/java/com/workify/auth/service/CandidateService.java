@@ -137,8 +137,18 @@ public class CandidateService {
 
         return candidateRepository.save(candidate);
     }
-
-
+//    public List<Candidate> filterCandidates(String skill, Integer experiences) {
+//        if (skill != null && experiences != null) {
+//            return candidateRepository.findBySkillsContainingAndExperiencesGreaterThanEqual(skill, experiences);
+//        } else if (experiences != null) {
+//            return candidateRepository.findByExperiencesGreaterThanEqual( experiences);
+//        } else if (skill != null) {
+//            return candidateRepository.findBySkillsContaining(skill);
+//        } else {
+//            return candidateRepository.findAll();
+//        }
+//    }
+//
 
 @Transactional
     public void deleteCandidate(HttpServletRequest request) {

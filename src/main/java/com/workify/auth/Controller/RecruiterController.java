@@ -1,6 +1,8 @@
 package com.workify.auth.Controller;
 
 import com.workify.auth.models.Recruiter;
+import com.workify.auth.models.dto.GetResponse;
+import com.workify.auth.models.dto.GetResponseRecruiter;
 import com.workify.auth.models.dto.ResponseMessage;
 import com.workify.auth.models.dto.RecruiterDto;
 import com.workify.auth.service.RecruiterService;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/recruiter")
@@ -46,8 +49,9 @@ public class RecruiterController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Page<Recruiter>> getAllRecruiters(Pageable pageable) {
-        return ResponseEntity.ok(recruiterService.getAllRecruiters(pageable));
+    public ResponseEntity<List<RecruiterDto>> getAllRecruiters(Pageable pageable) {
+        List<RecruiterDto> recruiters = recruiterService.getAllRecruitersDto(pageable);
+        return ResponseEntity.ok(recruiters);
     }
 
     @GetMapping("/search")
@@ -59,7 +63,10 @@ public class RecruiterController {
     public ResponseEntity<Page<Recruiter>> searchByCompanyName(@RequestParam String companyName, Pageable pageable) {
         return ResponseEntity.ok(recruiterService.searchByCompanyName(companyName, pageable));
     }
-
+    @GetMapping("/current-recruiter")
+    public ResponseEntity<GetResponseRecruiter> getCurrentRecruiter() {
+        return ResponseEntity.ok(recruiterService.getCurrentRecruiter());
+    }
     @GetMapping("/search/jobTitle")
     public ResponseEntity<Page<Recruiter>> searchByJobTitle(@RequestParam String jobTitle, Pageable pageable) {
         return ResponseEntity.ok(recruiterService.searchByJobTitle(jobTitle, pageable));
