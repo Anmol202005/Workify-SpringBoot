@@ -254,8 +254,15 @@ public class JobService {
         Candidate applicant = candidateRepository.findById(jobApplication1.getApplicant().getId()).get();
         if(recruiter.isPresent()) {
             if(jobApplication.getJob().getPostedBy()==recruiter.get()) {
+
                 ApplicationStatus applicationStatus = ApplicationStatus.valueOf(status.getStatus().toUpperCase());
-                sendAcceptedEmailToCandidate(applicant.getUser().getEmail(), applicant.getUser().getFirstName(),applicant.getUser().getLastName(),jobApplication.getJob().getCompany());
+                if(applicationStatus.equals(ApplicationStatus.REJECTED)) {
+                    sendRejectedEmailToCandidate(applicant.getUser().getEmail(), applicant.getUser().getFirstName(),applicant.getUser().getLastName(),jobApplication.getJob().getCompany());
+                }
+                else if(applicationStatus.equals(ApplicationStatus.ACCEPTED)) {
+                    sendAcceptedEmailToCandidate(applicant.getUser().getEmail(), applicant.getUser().getFirstName(),applicant.getUser().getLastName(),jobApplication.getJob().getCompany());
+                }
+                //sendAcceptedEmailToCandidate(applicant.getUser().getEmail(), applicant.getUser().getFirstName(),applicant.getUser().getLastName(),jobApplication.getJob().getCompany());
                 jobApplication.setStatus(applicationStatus);
                 jobApplicationRepository.save(jobApplication);
             }
@@ -314,6 +321,29 @@ public class JobService {
                 "<p> Hi "+ firstname +" "+ lastname +", </p>" +
                 "<p>Congratulations your resume got shortlisted for further recruitment process our recruiter will contact with you and will share further details with you .</p>" +
                 "<p> We appreciate your interest in joining us!</p>" +
+                companyName + " <p>Recruiting </p>"+
+                "</body></html>";
+
+        // Set the content type to HTML
+        //return emailService.sendEmail(email, subject, body, true);
+        if(emailService.sendEmail(email, subject, body, true).getStatusCode().is2xxSuccessful()) {
+            System.out.println("Email sent successfully");
+        }
+        else {
+            throw new RuntimeException("Email not sent");
+        }
+
+    }
+    public void sendRejectedEmailToCandidate(String email, String firstname,String lastname,String companyName) {
+        String subject = "Dear Applicant";
+        String imageUrl = "https://i.ibb.co/kJkpyt6/Workify.png";
+        String body = "<html><body>" +
+                "<img src='" + imageUrl + "' alt='Verification Image' style='max-width:100%;height:auto;'>" +
+                "<p>Thank you for taking the time to apply for the job at "+ companyName + ". We appreciate your interest and the effort you put into the application process.</p>\n" +
+                "    <p>After careful consideration, we regret to inform you that we have decided to move forward with other candidates whose qualifications more closely match the requirements of this role.</p>\n" +
+                "    <p>Please know that this decision was not an easy one, as we were genuinely impressed with your skills and experience.</p>\n" +
+                "    <p>We encourage you to keep an eye on future opportunities with us. We would be delighted to consider your application for other positions that align with your expertise.</p>\n" +
+                "    <p>Thank you once again for your interest in joining [Company Name]. We wish you all the best in your job search and future endeavors.</p>" +
                 companyName + " <p>Recruiting </p>"+
                 "</body></html>";
 
