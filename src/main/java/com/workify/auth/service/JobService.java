@@ -3,6 +3,7 @@ package com.workify.auth.service;
 import com.workify.auth.models.*;
 import com.workify.auth.models.dto.JobDto;
 import com.workify.auth.models.dto.JobResponseDto;
+import com.workify.auth.models.dto.StatusDto;
 import com.workify.auth.repository.*;
 import jakarta.persistence.criteria.Join;
 import jakarta.servlet.http.HttpServletRequest;
@@ -244,14 +245,19 @@ public class JobService {
         return applications;
     }
 
-    public void updateStatus(Long applicationId, ApplicationStatus status) {
+    public void updateStatus(Long applicationId, StatusDto status) {
         JobApplication jobApplication = jobApplicationRepository.findById(applicationId).get();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();
         Optional<Recruiter> recruiter=recruiterRepository.findByUser(currentUser);
+        JobApplication jobApplication1 = jobApplicationRepository.findById(applicationId).get();
+        Candidate applicant = candidateRepository.findById(jobApplication1.getApplicant().getId()).get();
         if(recruiter.isPresent()) {
             if(jobApplication.getJob().getPostedBy()==recruiter.get()) {
-                jobApplication.setStatus(status);
+                ApplicationStatus applicationStatus = ApplicationStatus.valueOf(status.getStatus().toUpperCase());
+                sendAcceptedEmailToCandidate(applicant.getUser().getEmail(), applicant.getUser().getFirstName(),applicant.getUser().getLastName(),jobApplication.getJob().getCompany());
+                jobApplication.setStatus(applicationStatus);
+                jobApplicationRepository.save(jobApplication);
             }
             else {
                 throw new RuntimeException("Permission denied");
@@ -288,6 +294,27 @@ public class JobService {
                 "<p> Thanks for applying to " + companyName + " There are ton of great companies out there, so we appreciate your interest in joining our team.</p>" +
                 "<p> While we're not able to reach out to every applicant, our recruiting team will contact you if your skills and experience are a strong match for the role.</p>" +
                 "<p> We appreciate your interest in joining us!</p>" +
+                "</body></html>";
+
+        // Set the content type to HTML
+        //return emailService.sendEmail(email, subject, body, true);
+        if(emailService.sendEmail(email, subject, body, true).getStatusCode().is2xxSuccessful()) {
+            System.out.println("Email sent successfully");
+        }
+        else {
+            throw new RuntimeException("Email not sent");
+        }
+
+    }
+    public void sendAcceptedEmailToCandidate(String email, String firstname,String lastname,String companyName) {
+        String subject = "Congratulations For Getting Shortlisted";
+        String imageUrl = "https://i.ibb.co/kJkpyt6/Workify.png";
+        String body = "<html><body>" +
+                "<img src='" + imageUrl + "' alt='Verification Image' style='max-width:100%;height:auto;'>" +
+                "<p> Hi "+ firstname +" "+ lastname +", </p>" +
+                "<p>Congratulations your resume got shortlisted for further recruitment process our recruiter will contact with you and will share further details with you .</p>" +
+                "<p> We appreciate your interest in joining us!</p>" +
+                companyName + " <p>Recruiting </p>"+
                 "</body></html>";
 
         // Set the content type to HTML

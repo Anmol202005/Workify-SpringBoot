@@ -6,6 +6,7 @@ import com.workify.auth.models.JobApplication;
 import com.workify.auth.models.dto.JobDto;
 import com.workify.auth.models.dto.JobResponseDto;
 import com.workify.auth.models.dto.ResponseMessage;
+import com.workify.auth.models.dto.StatusDto;
 import com.workify.auth.service.JobService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +79,7 @@ public class JobController {
         return ResponseEntity.ok(jobService.applicationsForJob(jobId));
     }
     @PostMapping("/application/update-status/{applicationId}")
-    public ResponseEntity<ResponseMessage> updateApplicationStatus(@PathVariable Long applicationId, @RequestBody ApplicationStatus status) {
+    public ResponseEntity<ResponseMessage> updateApplicationStatus(@PathVariable Long applicationId, @RequestBody StatusDto status) {
         jobService.updateStatus(applicationId,status);
         return ResponseEntity.ok(ResponseMessage.builder()
                 .message("Status updated successfully")
