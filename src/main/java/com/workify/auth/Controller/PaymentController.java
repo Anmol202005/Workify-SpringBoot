@@ -4,6 +4,7 @@ import com.razorpay.RazorpayException;
 import com.workify.auth.service.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -22,5 +23,10 @@ public class PaymentController {
     @PostMapping("/create-order")
     public String createOrder(@RequestBody Map<String, Object> data, HttpServletRequest request) throws RazorpayException {
         return paymentService.createOrder(data, request);
+    }
+
+    @PostMapping("/update-order")
+    public ResponseEntity<?> updateOrder(@RequestBody Map<String, Object> data, HttpServletRequest request) {
+        return ResponseEntity.ok(paymentService.updateOrder(data, request));
     }
 }

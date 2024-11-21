@@ -3,6 +3,8 @@ package com.workify.auth.repository;
 import com.workify.auth.models.Orders;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface OrderRepository extends JpaRepository<Orders, Long> {
+import java.util.Optional;
 
+public interface OrderRepository extends JpaRepository<Orders, Long> {
+    Optional<Orders> findByOrderId(String orderId);
 }

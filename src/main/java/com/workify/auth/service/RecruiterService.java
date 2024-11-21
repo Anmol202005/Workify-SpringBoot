@@ -40,7 +40,7 @@ public class RecruiterService {
 
 
 
-    public Recruiter createRecruiter(RecruiterDto recruiterdto, HttpServletRequest request) {
+    public String createRecruiter(RecruiterDto recruiterdto, HttpServletRequest request) {
         final String authHeader = request.getHeader("Authorization");
         final String username;
         String token = authHeader.replace("Bearer ", "");
@@ -51,7 +51,7 @@ public class RecruiterService {
             Recruiter recruiter = convertDtoToRecruiter(recruiterdto, user);
             user.get().setRole(Role.RECRUITER);
             userRepository.save(user.get());
-            return recruiter;
+            return ("Recruiter Created Successfully");
         } else {
             throw new RuntimeException("User not found");
         }

@@ -89,6 +89,7 @@ public class AuthService {
             user.setEmail(request.getEmail());
             user.setMobile(request.getMobile());
             user.setPassword(passwordEncoder.encode(password));
+            user.setMembership(false);
             user.setRole(role);
             user.setVerified(false);
             String otp= generateotp();
@@ -113,6 +114,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(role)
                 .verified(false)
+                .membership(false)
                 .registerRequestTimer(LocalDateTime.now())
                 .build();
 

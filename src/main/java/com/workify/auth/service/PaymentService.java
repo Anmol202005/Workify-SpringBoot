@@ -42,7 +42,7 @@ public class PaymentService {
 
         Optional<User> user = userRepository.findByUsername(username);
         Orders newOrder = new Orders();
-        newOrder.setOrderId(order.get("id"));
+        newOrder.setOrderId(order.get("oder_id"));
         newOrder.setAmount(order.get("amount"));
         newOrder.setStatus(order.get("status"));
         newOrder.setUser(user.get());
@@ -53,4 +53,23 @@ public class PaymentService {
     }
 
 
-}
+    public String updateOrder(Map<String, Object> data, HttpServletRequest request) {
+        Optional<Orders> optionalOrders = orderRepository.findByOrderId(data.get("order_id").toString());
+        final String authHeader = request.getHeader("Authorization");
+        final String username;
+        String token = authHeader.replace("Bearer ", "");
+        username = Jwtservice.extractusername(token);
+
+        Optional<User> user = userRepository.findByUsername(username);
+            Orders orders = optionalOrders.get();
+            orders.setStatus(data.get("status").toString());
+            orders.setPaymentId(data.get("payment_id").toString());
+            orderRepository.save(orders);
+            if(orders.getStatus().equals("paid")){
+                user.get().setMembership(true);
+                userRepository.save(user.get());
+                return ("Payment successful");
+            }
+            return ("Payment failed");
+    }
+    }

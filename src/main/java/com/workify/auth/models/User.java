@@ -39,6 +39,7 @@ public class User implements UserDetails {
     private String username;
     private String email;
     private String mobile;
+    private Boolean membership;
     @JsonIgnore
     private String password;
     @Enumerated(EnumType.STRING)
