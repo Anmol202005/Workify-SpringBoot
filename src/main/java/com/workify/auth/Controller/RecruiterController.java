@@ -29,7 +29,10 @@ public class RecruiterController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createRecruiter(@RequestBody RecruiterDto recruiterdto, HttpServletRequest request) {
-        return ResponseEntity.ok(recruiterService.createRecruiter(recruiterdto, request));
+        Recruiter savedRecruiter = recruiterService.createRecruiter(recruiterdto, request);
+        return ResponseEntity.ok(ResponseMessage.builder()
+                .message("Recruiter created successfully")
+                .build());
     }
 
     @GetMapping("/{id}")

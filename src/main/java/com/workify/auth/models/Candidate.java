@@ -33,6 +33,7 @@ public class Candidate {
 
     private LocalDate DOB;
     private URL resumeKey;
+    private URL portfolioKey;
     private URL profileImageKey;
 
 

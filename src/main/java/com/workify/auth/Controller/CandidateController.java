@@ -140,6 +140,18 @@ public class CandidateController {
         return ResponseEntity.ok(candidateService.getCurrentUser());
     }
 
+    @PostMapping("/portfolio")
+    public ResponseEntity<ResponseMessage> uploadPortfolio(
+            @RequestParam("Portfolio") MultipartFile portfolio,
+            HttpServletRequest request
+    ) throws Exception {
 
+
+        candidateService.savePortfolio(portfolio,request);
+
+        return ResponseEntity.ok(ResponseMessage.builder()
+                .message("Portfolio uploaded successfully")
+                .build());
+    }
 }
 

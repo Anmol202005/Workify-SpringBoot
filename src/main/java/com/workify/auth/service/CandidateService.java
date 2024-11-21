@@ -414,6 +414,41 @@ public class CandidateService {
 
         return getResponse;
     }
+
+    public void savePortfolio(MultipartFile portfolio, HttpServletRequest request) throws Exception {
+
+        final String authHeader = request.getHeader("Authorization");
+        final String username;
+        String token = authHeader.replace("Bearer ", "");
+        username=Jwtservice.extractusername(token);
+
+        Optional<User> user= userRepository.findByUsername(username);
+        var candidate = candidateRepository.findByUser(user);
+        if (!portfolio.getContentType().equals("application/pdf")) {
+            throw new RuntimeException("Only PDF files are supported");
+        }
+
+        // Validate file size
+        if (portfolio.getSize() > MAX_CERTIFICATE_SIZE) {
+            throw new RuntimeException("File size exceeds the maximum limit of 5 MB.");
+        }
+        if(candidate.getPortfolioKey()!=null) {
+            amazonS3.deleteObject(bucketName,getKeyFromUrl(candidate.getPortfolioKey().toString()));
+        }
+        String fileName = "portfolio"+user.get().getId() + "/" + portfolio.getOriginalFilename();
+
+        // Upload file to S3
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentType(portfolio.getContentType()); // Use the MIME type from the uploaded file
+        metadata.setContentLength(portfolio.getSize());
+
+
+        amazonS3.putObject(bucketName, fileName, portfolio.getInputStream(), metadata);
+
+        candidate.setResumeKey(new URL("https://anmol-workify-private.s3.ap-south-1.amazonaws.com/"+fileName.replace(" ", "+")));
+        candidateRepository.save(candidate);
+
+    }
 }
 
 

@@ -59,13 +59,13 @@ public class RecruiterService {
         username = Jwtservice.extractusername(token);
 
         Optional<User> user = userRepository.findByUsername(username);
-        if (user.isPresent()) {
+        if (!recruiterRepository.existsByUser(user)) {
             Recruiter recruiter = convertDtoToRecruiter(recruiterdto, user);
             user.get().setRole(Role.RECRUITER);
             userRepository.save(user.get());
             return recruiter;
         } else {
-            throw new RuntimeException("User not found");
+            throw new RuntimeException("Recruiter already exists");
         }
     }
 
