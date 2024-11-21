@@ -46,9 +46,11 @@ public class RecruiterController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteRecruiterProfile(@RequestBody HttpServletRequest request) {
+    public ResponseEntity<?> deleteRecruiterProfile(HttpServletRequest request) {
         recruiterService.deleteRecruiterProfile(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ResponseMessage.builder()
+                .message("Recruiter Deleted Successfully")
+                .build());
     }
 
     @GetMapping("/all")
