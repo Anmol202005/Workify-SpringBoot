@@ -72,7 +72,7 @@ public class AuthService {
 //
 //
         String password = request.getPassword();
-        Role role = request.getRole() != null ? request.getRole() : Role.CANDIDATE;
+        //Role role = request.getRole() != null ? request.getRole() : Role.CANDIDATE;
         String contact=request.getEmail()!=null ? request.getEmail() : request.getMobile();
         if(repository.existsByUsernameAndVerified(contact,false)){
             var user=repository.findByUsername(contact).orElseThrow();
@@ -90,7 +90,7 @@ public class AuthService {
             user.setMobile(request.getMobile());
             user.setPassword(passwordEncoder.encode(password));
             user.setMembership(false);
-            user.setRole(role);
+            user.setRole(Role.USER);
             user.setVerified(false);
             String otp= generateotp();
             user.setOtp(otp);
@@ -112,7 +112,7 @@ public class AuthService {
                 .username(contact)
                 .mobile(request.getMobile())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(role)
+                .role(Role.USER)
                 .verified(false)
                 .membership(false)
                 .registerRequestTimer(LocalDateTime.now())

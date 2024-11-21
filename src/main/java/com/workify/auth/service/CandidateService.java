@@ -171,6 +171,9 @@ public class CandidateService {
         username=Jwtservice.extractusername(token);
 
         Optional<User> user= userRepository.findByUsername(username);
+        if(user.get().getRole()==Role.RECRUITER) {
+            throw new RuntimeException("Recruiters cannot create candidate profiles");
+        }
         if(candidateRepository.existsByUser(user)) {
             throw new RuntimeException("Candidate with Email " + username + " already exists");
         }
@@ -198,6 +201,8 @@ public class CandidateService {
             }
             candidate.setExperiences(experiences);
         }
+        user.get().setRole(Role.CANDIDATE);
+        userRepository.save(user.get());
         candidateRepository.save(candidate);
         return candidate;
     }

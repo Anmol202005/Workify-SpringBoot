@@ -59,6 +59,9 @@ public class RecruiterService {
         username = Jwtservice.extractusername(token);
 
         Optional<User> user = userRepository.findByUsername(username);
+        if(user.get().getRole()==Role.CANDIDATE){
+            throw new RuntimeException("Candidate cannot be a recruiter");
+        }
         if (!recruiterRepository.existsByUser(user)) {
             Recruiter recruiter = convertDtoToRecruiter(recruiterdto, user);
             user.get().setRole(Role.RECRUITER);
