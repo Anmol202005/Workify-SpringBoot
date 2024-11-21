@@ -69,15 +69,17 @@ public class RecruiterController {
     public ResponseEntity<Page<Recruiter>> searchByIndustry(@RequestParam String industry, Pageable pageable) {
         return ResponseEntity.ok(recruiterService.searchByIndustry(industry, pageable));
     }
-    @PostMapping("/profile-picture")
+    @PostMapping("/Profile-picture")
     public ResponseEntity<ResponseMessage> uploadProfilePicture(
             @RequestParam("image") MultipartFile image,
             HttpServletRequest request
-    ) throws IOException {
-        recruiterService.saveProfilePicture(image, request);
+    ) throws Exception {
+
+
+        recruiterService.saveProfilePicture(image,request);
 
         return ResponseEntity.ok(ResponseMessage.builder()
-                .message("Profile picture uploaded successfully")
+                .message("Profile photo uploaded successfully")
                 .build());
     }
 }

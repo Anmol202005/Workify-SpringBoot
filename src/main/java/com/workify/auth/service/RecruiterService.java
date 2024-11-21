@@ -1,5 +1,7 @@
 package com.workify.auth.service;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.workify.auth.models.Job;
 import com.workify.auth.models.Recruiter;
 import com.workify.auth.models.Role;
@@ -12,23 +14,32 @@ import com.workify.auth.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Optional;
 
 @Service
 public class RecruiterService {
+    private static final long MAX_PROFILE_PIC_SIZE = 2 * 1024 * 1024; // 2 MB
+    private static final long MAX_CERTIFICATE_SIZE = 5 * 1024 * 1024; // 5 MB
+    @Value("${aws_bucket_name}")
+    private String bucketName;
+
+    private final AmazonS3 amazonS3;
     @Autowired
     private final RecruiterRepository recruiterRepository;
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
-    public RecruiterService(RecruiterRepository recruiterRepository) {
+    public RecruiterService(AmazonS3 amazonS3, RecruiterRepository recruiterRepository) {
+        this.amazonS3 = amazonS3;
         this.recruiterRepository = recruiterRepository;
 
     }
@@ -125,20 +136,41 @@ public class RecruiterService {
             throw new RuntimeException("Recruiter not found");
         }
     }
-    public void saveProfilePicture(MultipartFile image, HttpServletRequest id) throws IOException {
-        byte[] imageData = image.getBytes();
-        final String authHeader = id.getHeader("Authorization");
+    public void saveProfilePicture(MultipartFile image, HttpServletRequest request) throws Exception {
+
+        final String authHeader = request.getHeader("Authorization");
         final String username;
         String token = authHeader.replace("Bearer ", "");
-        username = Jwtservice.extractusername(token);
+        username=Jwtservice.extractusername(token);
 
-        Optional<User> userOptional = userRepository.findByUsername(username);
+        Optional<User> user= userRepository.findByUsername(username);
+        var recruiter = recruiterRepository.findByUser(user.get());
+        String contentType = image.getContentType();
+        if (!isAllowedProfilePictureFormat(contentType)) {
+            throw new RuntimeException("Invalid file format. Only PNG, JPG, and JPEG files are allowed.");
+        }
 
-            User user = userOptional.get();
-            Optional<Recruiter> recruiterOptional = recruiterRepository.findByUser(user);
-                Recruiter recruiter = recruiterOptional.get();
-                recruiter.setProfileImage(imageData);
-                recruiterRepository.save(recruiter);
+        // Validate file size
+        if (image.getSize() > MAX_PROFILE_PIC_SIZE) {
+            throw new RuntimeException("File size exceeds the maximum limit of 2 MB.");
+        }
+        if(recruiter.get().getProfileImage()!=null) {
+            amazonS3.deleteObject(bucketName, getKeyFromUrl(recruiter.get().getProfileImage().toString()));
+
+        }
+        String fileName = "profilepic"+user.get().getId() + "/" + image.getOriginalFilename();
+
+        // Upload file to S3
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentType(image.getContentType()); // Use the MIME type from the uploaded file
+        metadata.setContentLength(image.getSize());
+
+
+        amazonS3.putObject(bucketName, fileName, image.getInputStream(), metadata);
+
+        recruiter.get().setProfileImage(new URL("https://anmol-workify-private.s3.ap-south-1.amazonaws.com/"+fileName.replace(" ", "+")));
+        recruiterRepository.save(recruiter.get());
+
     }
     private Recruiter convertDtoToRecruiter(RecruiterDto recruiterDto, Optional<User> user) {
         Recruiter recruiter = new Recruiter();
@@ -151,5 +183,23 @@ public class RecruiterService {
         recruiter.setIndustry(recruiterDto.getIndustry());
         recruiterRepository.save(recruiter);
         return recruiter;
+    }
+    public static String getKeyFromUrl(String s3Url) throws Exception {
+        // Parse the URL
+        URL url = new URL(s3Url);
+
+        // Extract the path from the URL
+        String path = url.getPath();
+
+        // Remove the leading '/' from the path to get the key
+        return path.startsWith("/") ? path.substring(1) : path;
+    }
+    private boolean isAllowedProfilePictureFormat(String contentType) {
+        return contentType != null && (
+                contentType.equals("image/png") ||
+                        contentType.equals("image/jpeg") ||
+                        contentType.equals("image/jpg")
+        );
+
     }
 }

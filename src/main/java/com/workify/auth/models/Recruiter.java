@@ -2,13 +2,15 @@ package com.workify.auth.models;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.net.URL;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Setter
+@Getter
 @Entity
 public class Recruiter {
 
@@ -25,5 +27,5 @@ public class Recruiter {
     private String companyWebsite;
     private String companyLocation;
     private String industry;
-    private byte[] profileImage;
+    private URL profileImage;
 }
