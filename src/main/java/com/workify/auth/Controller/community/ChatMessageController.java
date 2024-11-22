@@ -4,6 +4,7 @@ import com.workify.auth.models.community.ChatMessage;
 import com.workify.auth.models.community.Community;
 import com.workify.auth.repository.community.ChatMessageRepository;
 import com.workify.auth.repository.community.CommunityRepository;
+import com.workify.auth.service.ChatMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,45 +16,25 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/communities//messages")
+@RequestMapping("/messages")
 public class ChatMessageController {
 
     @Autowired
-    private ChatMessageRepository chatMessageRepository;
-
-    @Autowired
-    private CommunityRepository communityRepository;
+    private ChatMessageService chatMessageService;
 
     @MessageMapping("/sendMessage/{communityId}")
     @SendTo("/topic/messages/{communityId}")
-    public ChatMessage sendMessage(@PathVariable Long communityId, ChatMessage message) {
-        Community community = communityRepository.findById(communityId)
-                .orElseThrow(() -> new IllegalArgumentException("Community not found"));
-
-        if (!community.getMembers().contains(message.getSender())) {
-            throw new IllegalArgumentException("User is not a member of this community.");
-        }
-
-        message.setCommunity(community);
-        message.setTimestamp(LocalDateTime.now());
-        return chatMessageRepository.save(message);
+    public ChatMessage sendMessage(@PathVariable Long communityId,  ChatMessage message) {
+        return chatMessageService.sendMessage(communityId, message);
     }
 
-
-    @GetMapping("/{communityId}/messages")
+    @GetMapping("/{communityId}")
     public ResponseEntity<?> getChatHistory(@PathVariable Long communityId, @RequestParam String userId) {
-        Community community = communityRepository.findById(communityId)
-                .orElseThrow(() -> new IllegalArgumentException("Community not found"));
-
-        if (!community.getMembers().contains(userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied: User is not a member of this community.");
+        try {
+            List<ChatMessage> messages = chatMessageService.getChatHistory(communityId, userId);
+            return ResponseEntity.ok(messages);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
         }
-
-        List<ChatMessage> messages = chatMessageRepository.findByCommunityId(communityId);
-        return ResponseEntity.ok(messages);
     }
-
-
-
 }
-
