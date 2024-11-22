@@ -33,7 +33,7 @@ public class AuthService {
 //
 //            if (userOptional.isPresent() && userOptional.get().getVerified()) {
 //                return ResponseMessage.builder()
-//                        .message("Username already exists")
+//                        .message("Username already exists")candidate_experience
 //                        .build();
 //            }
 //
@@ -86,7 +86,7 @@ public class AuthService {
 
             user.setFirstName(request.getFirstName());
             user.setLastName(request.getLastName());
-            user.setEmail(request.getEmail());
+            user.setEmail(email);
             user.setMobile(request.getMobile());
             user.setPassword(passwordEncoder.encode(password));
             user.setMembership(false);
@@ -108,7 +108,7 @@ public class AuthService {
         else{var user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
-                .email(request.getEmail())
+                .email(email)
                 .username(contact)
                 .mobile(request.getMobile())
                 .password(passwordEncoder.encode(request.getPassword()))
