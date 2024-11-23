@@ -1,6 +1,7 @@
 package com.workify.auth.repository;
 
 import com.workify.auth.models.Job;
+import com.workify.auth.models.Recruiter;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -19,5 +20,7 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
             "LOWER(skill) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Job> searchJobs(String keyword);
     List<Job> findByPostedById(Long recruiterId);
+    void deleteByPostedBy(Recruiter recruiter);
 
+    Iterable<Object> findByPostedBy(Recruiter recruiter);
 }

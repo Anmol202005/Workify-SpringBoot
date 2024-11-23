@@ -45,7 +45,13 @@ public class JobService {
         this.candidateRepository = candidateRepository;
         this.jobApplicationRepository = jobApplicationRepository;
     }
-
+    @Transactional
+    public void deleteJob(Long jobId) {
+        // Delete associated job applications
+        jobApplicationRepository.deleteByJobId(jobId);
+        // Delete job
+        jobRepository.deleteById(jobId);
+    }
     public Job postJob(JobDto jobDto, HttpServletRequest request) {
         final String authHeader = request.getHeader("Authorization");
         final String username;

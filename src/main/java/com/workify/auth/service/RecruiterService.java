@@ -10,6 +10,7 @@ import com.workify.auth.models.dto.GetResponse;
 import com.workify.auth.models.dto.GetResponseRecruiter;
 import com.workify.auth.models.dto.JobDto;
 import com.workify.auth.models.dto.RecruiterDto;
+import com.workify.auth.repository.JobApplicationRepository;
 import com.workify.auth.repository.JobRepository;
 import com.workify.auth.repository.RecruiterRepository;
 import com.workify.auth.repository.UserRepository;
@@ -42,6 +43,10 @@ public class RecruiterService {
     private final RecruiterRepository recruiterRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private JobRepository jobRepository;
+    @Autowired
+    private JobApplicationRepository jobApplicationRepository;
 
     @Autowired
     public RecruiterService(AmazonS3 amazonS3, RecruiterRepository recruiterRepository) {
@@ -108,6 +113,7 @@ private RecruiterDto convertRecruiterToDto(Recruiter recruiter) {
     dto.setIndustry(recruiter.getIndustry());
     return dto;
 }
+    @Transactional
     public void deleteRecruiterProfile(HttpServletRequest id) {
         final String authHeader = id.getHeader("Authorization");
         final String username;
@@ -117,6 +123,10 @@ private RecruiterDto convertRecruiterToDto(Recruiter recruiter) {
         Optional<User> user = userRepository.findByUsername(username);
         Optional<Recruiter> recruiter = recruiterRepository.findByUser(user.get());
         if (recruiter.isPresent()) {
+            jobRepository.findByPostedBy(recruiter.get()).forEach(job -> {
+                jobApplicationRepository.deleteByJobId(((Job)job).getId());
+            });
+            jobRepository.deleteByPostedBy(recruiter.get());
             recruiterRepository.delete(recruiter.get());
         } else {
             throw new RuntimeException("Recruiter not found");
