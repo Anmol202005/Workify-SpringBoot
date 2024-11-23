@@ -7,6 +7,7 @@ import com.workify.auth.models.dto.StatusDto;
 import com.workify.auth.repository.*;
 import jakarta.persistence.criteria.Join;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -356,5 +357,13 @@ public class JobService {
             throw new RuntimeException("Email not sent");
         }
 
+    }
+
+
+    public List<JobResponseDto> getAllJobs() {
+    List<Job> jobs = jobRepository.findAll();
+    return jobs.stream()
+            .map(this::mapToResponseDto)
+            .collect(Collectors.toList());
     }
 }

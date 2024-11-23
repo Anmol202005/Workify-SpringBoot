@@ -32,7 +32,11 @@ public class JobController {
                 .message("Job Posted Successfully")
                 .build());
     }
-
+    @GetMapping("/all-jobs")
+    public ResponseEntity<?> getAllJobs() {
+        List<JobResponseDto> jobs = jobService.getAllJobs();
+        return ResponseEntity.ok(jobs);
+    }
     @GetMapping("/filter/title")
     public ResponseEntity<List<Job>> getJobsByTitle(@RequestParam String title) {
         return ResponseEntity.ok(jobService.getJobsByTitle(title));
