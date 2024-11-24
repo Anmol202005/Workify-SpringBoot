@@ -174,15 +174,14 @@ public class JobService {
         Recruiter recruiter = job.getPostedBy();
         Notification notification = new Notification();
         notification.setTitle("Applied for your Job");
-        notification.setMessage("Applied by "+applicant.getUser().getFirstName()+" "+applicant.getUser().getLastName());
+        String applicantLastName = applicant.getUser().getLastName();
+        String lastNamePart = (applicantLastName != null && !applicantLastName.isEmpty()) ? " " + applicantLastName : "";
+        notification.setMessage("Applied by "+applicant.getUser().getFirstName()+" "+lastNamePart);
 
         notification.setUser(recruiter.getUser());
         notificationRepository.save(notification);
         String recruiterEmail = recruiter.getUser().getEmail();
         String applicantFirstName = applicant.getUser().getFirstName();
-        String applicantLastName = applicant.getUser().getLastName();
-        String lastNamePart = (applicantLastName != null && !applicantLastName.isEmpty()) ? " " + applicantLastName : "";
-
         String jobTitle = job.getTitle();
         String jobLocation = job.getLocation();
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
