@@ -171,6 +171,8 @@ public class CandidateService {
         certificateRepository.deleteAllByCandidate(candidate);
         experienceRepository.deleteAllByCandidate(candidate);
         candidateRepository.delete(candidate);
+        userRepository.save(user.get());
+
     }
 
     public Candidate saveCandidateWithEducation(CandidateDTO candidateDTO, HttpServletRequest request) throws IOException {
