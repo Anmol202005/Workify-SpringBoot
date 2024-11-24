@@ -73,7 +73,7 @@ public class AuthService {
 //
         String password = request.getPassword();
         //Role role = request.getRole() != null ? request.getRole() : Role.CANDIDATE;
-        String contact=request.getEmail()!=null ? request.getEmail() : request.getMobile();
+        String contact=request.getEmail()!=null ? request.getEmail().toLowerCase() : request.getMobile();
         if(repository.existsByUsernameAndVerified(contact,false)){
             var user=repository.findByUsername(contact).orElseThrow();
             long minuteElapsed = user.getRegisterRequestTimer() != null
@@ -135,7 +135,7 @@ public class AuthService {
 
     public ResponseEntity authenticate(AuthenticationRequest request) {
 //
-        if(!repository.existsByUsername(request.getContact())){ return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(AuthenticationResponse.builder()
+        if(!repository.existsByUsername(request.getContact().toLowerCase())){ return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(AuthenticationResponse.builder()
                 .message("User does not exist")
                 .build());}
         try {
