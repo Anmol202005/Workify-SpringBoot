@@ -76,7 +76,7 @@ public class RecruiterService {
         return recruiterRepository.findById(id);
     }
 
-    public Recruiter updateRecruiterProfile(RecruiterDto recruiter,HttpServletRequest request) {
+    public void updateRecruiterProfile(RecruiterDto recruiter,HttpServletRequest request) {
         final String authHeader = request.getHeader("Authorization");
         final String username;
         String token = authHeader.replace("Bearer ", "");
@@ -85,7 +85,7 @@ public class RecruiterService {
         Optional<User> user = userRepository.findByUsername(username);
         Optional<Recruiter> recruiterOptional = recruiterRepository.findByUser(user.get());
         if (recruiterOptional.isPresent()) {
-            return updateRecruiterFields(recruiterOptional.get().getId(), recruiter);
+             updateRecruiterFields(recruiterOptional.get().getId(), recruiter);
         } else {
             throw new RuntimeException("Recruiter not found");
         }
@@ -147,7 +147,7 @@ private RecruiterDto convertRecruiterToDto(Recruiter recruiter) {
         return recruiterRepository.findByUserId(userId);
     }
 
-    public Recruiter updateRecruiterFields(Long id, RecruiterDto recruiterDto) {
+    public void updateRecruiterFields(Long id, RecruiterDto recruiterDto) {
         Optional<Recruiter> optionalRecruiter = recruiterRepository.findById(id);
         if (optionalRecruiter.isPresent()) {
             Recruiter recruiter = optionalRecruiter.get();
@@ -157,7 +157,7 @@ private RecruiterDto convertRecruiterToDto(Recruiter recruiter) {
             recruiter.setCompanyWebsite(recruiterDto.getCompanyWebsite());
             recruiter.setCompanyLocation(recruiterDto.getCompanyLocation());
             recruiter.setIndustry(recruiterDto.getIndustry());
-            return recruiterRepository.save(recruiter);
+
         } else {
             throw new RuntimeException("Recruiter not found");
         }
