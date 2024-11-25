@@ -70,7 +70,6 @@ public class JobService {
             job.setPostedAt(LocalDateTime.now());
             job.setLocation(recruiterOptional.get().getCompanyLocation());
             job.setIndustry(recruiterOptional.get().getIndustry());
-            job.setEmploymentType(jobDto.getEmploymentType());
             job.setMaxSalary(jobDto.getMaxSalary());
             job.setMinSalary(jobDto.getMinSalary());
             job.setLocation(jobDto.getLocation());
@@ -99,7 +98,7 @@ public class JobService {
         return jobRepository.findByLocationContaining(location);
     }
 
-    public List<JobResponseDto> filterJobs(String title, String location, Integer minSalary, Integer maxSalary, Integer experience, String employmentType, List<String> requiredSkills,String jobtype,Mode mode) {
+    public List<JobResponseDto> filterJobs(String title, String location, Integer minSalary, Integer maxSalary, Integer experience, List<String> requiredSkills,String jobtype,Mode mode) {
         JobType type= JobType.valueOf(jobtype.toUpperCase());
         Specification<Job> spec = (root, query, criteriaBuilder) -> {
             Predicate predicate = criteriaBuilder.conjunction();
@@ -123,10 +122,7 @@ public class JobService {
                 predicate = criteriaBuilder.and(predicate,
                         criteriaBuilder.lessThanOrEqualTo(root.get("experience"), experience));
             }
-            if(employmentType != null){
-                predicate = criteriaBuilder.and(predicate,
-                        criteriaBuilder.equal(root.get("employmentType"), employmentType));
-            }
+
             if(requiredSkills != null && !requiredSkills.isEmpty()){
                 Join<Job, String> skillsJoin = root.join("requiredSkills");
                 List<String> lowerCaseSkills = requiredSkills.stream()
@@ -163,7 +159,6 @@ public class JobService {
                 job.getExperience(),
                 job.getMinSalary(),
                 job.getMaxSalary(),
-                job.getEmploymentType(),
                 new ArrayList<>(job.getRequiredSkills())
         );
     }

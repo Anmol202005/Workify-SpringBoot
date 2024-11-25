@@ -21,7 +21,6 @@ public class JobDto {
     private Integer Experience;
     private Integer minSalary;
     private Integer maxSalary;
-    private String employmentType;
     @ElementCollection
     private List<String> requiredSkills;
     private JobType jobType;

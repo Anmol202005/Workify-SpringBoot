@@ -15,6 +15,5 @@ public class JobResponseDto {
     private Integer Experience;
     private Integer minSalary;
     private Integer maxSalary;
-    private String employmentType;
     private List<String> requiredSkills;
 }

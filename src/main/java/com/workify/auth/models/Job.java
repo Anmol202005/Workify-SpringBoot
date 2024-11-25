@@ -27,7 +27,6 @@ public class Job {
     private String location;
     private Integer experience;
     private String industry;
-    private String employmentType;
     private LocalDateTime postedAt;
     private JobType jobType;
     private Mode mode;

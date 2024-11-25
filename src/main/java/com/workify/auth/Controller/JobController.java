@@ -58,7 +58,7 @@ public class JobController {
                                                            @RequestParam(required = false) List<String> requiredSkills,
                                                            @RequestParam(required = false) String jobType,
                                                            @RequestParam(required = false)Mode mode) {
-        return ResponseEntity.ok(jobService.filterJobs(title, location, minSalary, maxSalary, experience, employmentType, requiredSkills,jobType,mode));
+        return ResponseEntity.ok(jobService.filterJobs(title, location, minSalary, maxSalary, experience,  requiredSkills,jobType,mode));
     }
     @PostMapping("apply/applications/{jobId}")
     public ResponseEntity<ResponseMessage> getJob(@PathVariable long jobId,HttpServletRequest request) {
