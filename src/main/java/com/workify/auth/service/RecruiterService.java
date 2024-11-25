@@ -126,6 +126,8 @@ private RecruiterDto convertRecruiterToDto(Recruiter recruiter) {
             jobRepository.findByPostedBy(recruiter.get()).forEach(job -> {
                 jobApplicationRepository.deleteByJobId(((Job)job).getId());
             });
+            user.get().setRole(Role.USER);
+            userRepository.save(user.get());
             jobRepository.deleteByPostedBy(recruiter.get());
             recruiterRepository.delete(recruiter.get());
         } else {
