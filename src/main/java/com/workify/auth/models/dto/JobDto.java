@@ -1,6 +1,7 @@
 package com.workify.auth.models.dto;
 
 import com.workify.auth.models.JobType;
+import com.workify.auth.models.Mode;
 import jakarta.persistence.ElementCollection;
 import lombok.Data;
 import lombok.Getter;
@@ -24,4 +25,5 @@ public class JobDto {
     @ElementCollection
     private List<String> requiredSkills;
     private JobType jobType;
+    private Mode mode;
 }

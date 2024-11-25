@@ -30,6 +30,7 @@ public class Job {
     private String employmentType;
     private LocalDateTime postedAt;
     private JobType jobType;
+    private Mode mode;
     private Integer minSalary;
     private Integer maxSalary;
     @ElementCollection

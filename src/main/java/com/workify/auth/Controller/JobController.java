@@ -3,6 +3,7 @@ package com.workify.auth.Controller;
 import com.workify.auth.models.ApplicationStatus;
 import com.workify.auth.models.Job;
 import com.workify.auth.models.JobApplication;
+import com.workify.auth.models.Mode;
 import com.workify.auth.models.dto.JobDto;
 import com.workify.auth.models.dto.JobResponseDto;
 import com.workify.auth.models.dto.ResponseMessage;
@@ -55,8 +56,9 @@ public class JobController {
                                                            @RequestParam(required = false) Integer maxSalary,
                                                            @RequestParam(required = false) String employmentType,
                                                            @RequestParam(required = false) List<String> requiredSkills,
-                                                           @RequestParam(required = false) String jobType) {
-        return ResponseEntity.ok(jobService.filterJobs(title, location, minSalary, maxSalary, experience, employmentType, requiredSkills,jobType));
+                                                           @RequestParam(required = false) String jobType,
+                                                           @RequestParam(required = false)Mode mode) {
+        return ResponseEntity.ok(jobService.filterJobs(title, location, minSalary, maxSalary, experience, employmentType, requiredSkills,jobType,mode));
     }
     @PostMapping("apply/applications/{jobId}")
     public ResponseEntity<ResponseMessage> getJob(@PathVariable long jobId,HttpServletRequest request) {

@@ -1,5 +1,6 @@
 package com.workify.auth.repository;
 
+import com.workify.auth.models.Status;
 import com.workify.auth.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -14,6 +15,7 @@ public interface UserRepository extends JpaRepository<User,Long > {
     Optional<User> findByUsernameAndVerified(String username, boolean verified);
     Optional<User> findByEmailAndVerified(String email, boolean verified);
     Optional<User> findByMobileAndVerified(String mobile, boolean verified);
+    List<User> findByStatus(Status status);
     // List<User> findByUniqueUser(String username);
     boolean existsByMobile(String mobile);
     boolean existsByUsername(String username);

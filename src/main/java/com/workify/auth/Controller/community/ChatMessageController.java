@@ -1,40 +1,37 @@
 package com.workify.auth.Controller.community;
 
-import com.workify.auth.models.community.ChatMessage;
-import com.workify.auth.models.community.Community;
-import com.workify.auth.repository.community.ChatMessageRepository;
-import com.workify.auth.repository.community.CommunityRepository;
-import com.workify.auth.service.ChatMessageService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import com.workify.auth.config.WebSocketConfig;
+import com.workify.auth.models.User;
+import com.workify.auth.service.WebSocketService;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-@RestController
-@RequestMapping("/messages")
+@RequiredArgsConstructor
 public class ChatMessageController {
+    private final WebSocketService webSocketService;
 
-    @Autowired
-    private ChatMessageService chatMessageService;
-
-    @MessageMapping("/sendMessage/{communityId}")
-    @SendTo("/topic/messages/{communityId}")
-    public ChatMessage sendMessage(@PathVariable Long communityId,  ChatMessage message) {
-        return chatMessageService.sendMessage(communityId, message);
+    @MessageMapping("/user.addUser")
+    @SendTo("/user/topic")
+    public User addUser(@Payload User user) {
+         webSocketService.saveuser(user);
+         return user;
+    }
+    @MessageMapping("/user.disconnectUser")
+    @SendTo("/user/topic")
+    public User disconnectUser(@Payload User user) {
+        webSocketService.disconnect(user);
+        return user;
+    }
+    @GetMapping("/active-user")
+    public ResponseEntity<List<User>> getActiveUser() {
+        return ResponseEntity.ok(webSocketService.findConnectedUser());
     }
 
-    @GetMapping("/{communityId}")
-    public ResponseEntity<?> getChatHistory(@PathVariable Long communityId, @RequestParam String userId) {
-        try {
-            List<ChatMessage> messages = chatMessageService.getChatHistory(communityId, userId);
-            return ResponseEntity.ok(messages);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
-        }
-    }
 }
