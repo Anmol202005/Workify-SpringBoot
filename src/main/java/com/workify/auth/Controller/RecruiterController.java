@@ -40,7 +40,7 @@ public class RecruiterController {
         return ResponseEntity.ok(recruiterService.getRecruiterProfile(id));
     }
 
-    @PutMapping("/update")
+    @PatchMapping("/update")
     public ResponseEntity<?> updateRecruiterProfile(@RequestBody RecruiterDto recruiter,HttpServletRequest request) {
         return ResponseEntity.ok(ResponseMessage.builder()
                 .message("Recruiter updated successfully")
