@@ -25,7 +25,7 @@ public class PaymentService {
         this.userRepository = userRepository;
     }
     public String createOrder(Map<String, Object> data, HttpServletRequest request) throws RazorpayException {
-        int amt = 10;
+        int amt = Integer.parseInt(data.get("amount").toString());
         RazorpayClient client = new RazorpayClient("rzp_test_gIpzxBwR3tbaq3", "YRolKarPEQE9leckNKSZv2pz");
 
         JSONObject ob = new JSONObject();
@@ -42,7 +42,7 @@ public class PaymentService {
 
         Optional<User> user = userRepository.findByUsername(username);
         Orders newOrder = new Orders();
-        newOrder.setOrderId(order.get("oder_id"));
+        newOrder.setOrderId(order.get("id"));
         newOrder.setAmount(order.get("amount"));
         newOrder.setStatus(order.get("status"));
         newOrder.setUser(user.get());
@@ -54,14 +54,13 @@ public class PaymentService {
 
 
     public String updateOrder(Map<String, Object> data, HttpServletRequest request) {
-        Optional<Orders> optionalOrders = orderRepository.findByOrderId(data.get("order_id").toString());
+        Orders orders = orderRepository.findByOrderId(data.get("order_id").toString());
         final String authHeader = request.getHeader("Authorization");
         final String username;
         String token = authHeader.replace("Bearer ", "");
         username = Jwtservice.extractusername(token);
 
         Optional<User> user = userRepository.findByUsername(username);
-            Orders orders = optionalOrders.get();
             orders.setStatus(data.get("status").toString());
             orders.setPaymentId(data.get("payment_id").toString());
             orderRepository.save(orders);

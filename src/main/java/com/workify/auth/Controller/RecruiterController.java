@@ -42,7 +42,10 @@ public class RecruiterController {
 
     @PutMapping("/update")
     public ResponseEntity<?> updateRecruiterProfile(@RequestBody RecruiterDto recruiter,HttpServletRequest request) {
-        return ResponseEntity.ok(recruiterService.updateRecruiterProfile(recruiter,request));
+        Recruiter savedRecruiter = recruiterService.updateRecruiterProfile(recruiter,request);
+        return ResponseEntity.ok(ResponseMessage.builder()
+                .message("Profile Updated successfully")
+                .build());
     }
 
     @DeleteMapping("/delete")
