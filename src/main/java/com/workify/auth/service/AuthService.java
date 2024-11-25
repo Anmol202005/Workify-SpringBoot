@@ -141,7 +141,7 @@ public class AuthService {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            request.getContact(),
+                            request.getContact().toLowerCase(),
                             request.getPassword()));
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(AuthenticationResponse.builder()
