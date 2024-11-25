@@ -42,9 +42,8 @@ public class RecruiterController {
 
     @PutMapping("/update")
     public ResponseEntity<?> updateRecruiterProfile(@RequestBody RecruiterDto recruiter,HttpServletRequest request) {
-        Recruiter savedRecruiter = recruiterService.updateRecruiterProfile(recruiter,request);
         return ResponseEntity.ok(ResponseMessage.builder()
-                .message("Profile Updated successfully")
+                .message("Recruiter updated successfully")
                 .build());
     }
 

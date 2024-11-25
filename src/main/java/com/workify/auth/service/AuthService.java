@@ -33,7 +33,7 @@ public class AuthService {
 //
 //            if (userOptional.isPresent() && userOptional.get().getVerified()) {
 //                return ResponseMessage.builder()
-//                        .message("Username already exists")
+//                        .message("Username already exists")candidate_experience
 //                        .build();
 //            }
 //
@@ -73,7 +73,7 @@ public class AuthService {
 //
         String password = request.getPassword();
         //Role role = request.getRole() != null ? request.getRole() : Role.CANDIDATE;
-        String contact=request.getEmail()!=null ? request.getEmail() : request.getMobile();
+        String contact=request.getEmail()!=null ? request.getEmail().toLowerCase() : request.getMobile();
         if(repository.existsByUsernameAndVerified(contact,false)){
             var user=repository.findByUsername(contact).orElseThrow();
             long minuteElapsed = user.getRegisterRequestTimer() != null
@@ -86,7 +86,7 @@ public class AuthService {
 
             user.setFirstName(request.getFirstName());
             user.setLastName(request.getLastName());
-            user.setEmail(request.getEmail());
+            user.setEmail(email);
             user.setMobile(request.getMobile());
             user.setPassword(passwordEncoder.encode(password));
             user.setMembership(false);
@@ -108,7 +108,7 @@ public class AuthService {
         else{var user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
-                .email(request.getEmail())
+                .email(email)
                 .username(contact)
                 .mobile(request.getMobile())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -135,7 +135,7 @@ public class AuthService {
 
     public ResponseEntity authenticate(AuthenticationRequest request) {
 //
-        if(!repository.existsByUsername(request.getContact())){ return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(AuthenticationResponse.builder()
+        if(!repository.existsByUsername(request.getContact().toLowerCase())){ return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(AuthenticationResponse.builder()
                 .message("User does not exist")
                 .build());}
         try {

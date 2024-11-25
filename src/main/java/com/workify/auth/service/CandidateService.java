@@ -8,6 +8,7 @@ import com.workify.auth.models.*;
 import com.workify.auth.models.dto.CandidateDTO;
 import com.workify.auth.models.dto.GetResponse;
 import com.workify.auth.repository.*;
+import com.workify.auth.repository.community.CommunityRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,6 +45,8 @@ public class CandidateService {
     private EducationRepository educationRepository;
     @Autowired
     private ExperienceRepository experienceRepository;
+    @Autowired
+    private CommunityRepository communityRepository;
 
     public CandidateService(AmazonS3 amazonS3) {
         this.amazonS3 = amazonS3;
@@ -112,31 +115,36 @@ public class CandidateService {
         Optional<User> user = userRepository.findByUsername(username);
         var candidate = candidateRepository.findByUser(user);
 
-        candidate.setSkills(candidateDTO.getSkill());
-        candidate.setDOB(candidateDTO.getDOB());
+        // Update fields only if they are provided
+        if (candidateDTO.getSkill() != null) {
+            candidate.setSkills(candidateDTO.getSkill());
+        }
+
+        if (candidateDTO.getDOB() != null) {
+            candidate.setDOB(candidateDTO.getDOB());
+        }
 
         // Update Education
-        List<Education> newEducations = candidateDTO.getEducations();
-        candidate.getEducation().clear();  // Clear existing list instead of deleting
-        if (newEducations != null) {
-            for (Education education : newEducations) {
-                education.setCandidate(candidate);  // Set the candidate for each education
-                candidate.getEducation().add(education);  // Add to the existing list
+        if (candidateDTO.getEducations() != null) {
+            candidate.getEducation().clear();
+            for (Education education : candidateDTO.getEducations()) {
+                education.setCandidate(candidate);
+                candidate.getEducation().add(education);
             }
         }
 
         // Update Experience
-        List<Experience> newExperiences = candidateDTO.getExperiences();
-        candidate.getExperiences().clear();  // Clear existing list instead of deleting
-        if (newExperiences != null) {
-            for (Experience experience : newExperiences) {
-                experience.setCandidate(candidate);  // Set the candidate for each experience
-                candidate.getExperiences().add(experience);  // Add to the existing list
+        if (candidateDTO.getExperiences() != null) {
+            candidate.getExperiences().clear();
+            for (Experience experience : candidateDTO.getExperiences()) {
+                experience.setCandidate(candidate);
+                candidate.getExperiences().add(experience);
             }
         }
 
         return candidateRepository.save(candidate);
     }
+
 //    public List<Candidate> filterCandidates(String skill, Integer experiences) {
 //        if (skill != null && experiences != null) {
 //            return candidateRepository.findBySkillsContainingAndExperiencesGreaterThanEqual(skill, experiences);
@@ -158,10 +166,13 @@ public class CandidateService {
         username=Jwtservice.extractusername(token);
 
         Optional<User> user= userRepository.findByUsername(username);
+        user.get().setRole(Role.USER);
         var candidate = candidateRepository.findByUser(user);
         certificateRepository.deleteAllByCandidate(candidate);
         experienceRepository.deleteAllByCandidate(candidate);
         candidateRepository.delete(candidate);
+        userRepository.save(user.get());
+
     }
 
     public Candidate saveCandidateWithEducation(CandidateDTO candidateDTO, HttpServletRequest request) throws IOException {
