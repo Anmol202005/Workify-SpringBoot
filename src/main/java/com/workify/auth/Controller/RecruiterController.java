@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,8 +57,8 @@ public class RecruiterController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<RecruiterDto>> getAllRecruiters(Pageable pageable) {
-        List<RecruiterDto> recruiters = recruiterService.getAllRecruitersDto(pageable);
+    public ResponseEntity<Page<RecruiterDto>> getAllRecruiters(@PageableDefault(size = 10) Pageable pageable) {
+        Page<RecruiterDto> recruiters = recruiterService.getAllRecruitersDto(pageable);
         return ResponseEntity.ok(recruiters);
     }
 

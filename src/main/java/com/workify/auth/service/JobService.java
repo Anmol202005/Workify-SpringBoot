@@ -14,7 +14,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -98,8 +99,8 @@ public class JobService {
         return jobRepository.findByLocationContaining(location);
     }
 
-    public List<JobResponseDto> filterJobs(String title, String location, Integer minSalary, Integer maxSalary, Integer experience, List<String> requiredSkills,String jobtype,Mode mode) {
-        JobType type= JobType.valueOf(jobtype.toUpperCase());
+    public Page<JobResponseDto> filterJobs(String title, String location, Integer minSalary, Integer maxSalary, Integer experience, List<String> requiredSkills,String jobtype,Mode mode, Pageable pageable) {
+        final JobType type = (jobtype != null) ? JobType.valueOf(jobtype.toUpperCase()) : null;
         Specification<Job> spec = (root, query, criteriaBuilder) -> {
             Predicate predicate = criteriaBuilder.conjunction();
             if(title != null){
@@ -141,14 +142,12 @@ public class JobService {
             }
             return predicate;
         };
-        List<Job> filteredJobs = jobRepository.findAll(spec);
+        Page<Job> filteredJobs = jobRepository.findAll(spec, pageable);
         if(filteredJobs.isEmpty()){
             throw new RuntimeException("No Jobs Found");
         }
         else {
-            return filteredJobs.stream()
-                    .map(this::mapToResponseDto)
-                    .collect(Collectors.toList());
+            return filteredJobs.map(this::mapToResponseDto);
         }
     }
     private JobResponseDto mapToResponseDto(Job job) {
@@ -374,11 +373,8 @@ public class JobService {
     }
 
 
-    public List<JobResponseDto> getAllJobs() {
-    List<Job> jobs = jobRepository.findAll();
-    return jobs.stream()
-            .map(this::mapToResponseDto)
-            .collect(Collectors.toList());
+    public Page<JobResponseDto> getAllJobs(Pageable pageable) {
+        return jobRepository.findAll(pageable).map(this::mapToResponseDto);
     }
 
 }
