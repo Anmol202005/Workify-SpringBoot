@@ -14,7 +14,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -98,8 +99,8 @@ public class JobService {
         return jobRepository.findByLocationContaining(location);
     }
 
-    public List<JobResponseDto> filterJobs(String title, String location, Integer minSalary, Integer maxSalary, Integer experience, List<String> requiredSkills,String jobtype,Mode mode) {
-        JobType type= JobType.valueOf(jobtype.toUpperCase());
+    public Page<JobResponseDto> filterJobs(String title, String location, Integer minSalary, Integer maxSalary, Integer experience, List<String> requiredSkills,String jobtype,Mode mode, Pageable pageable) {
+        final JobType type = (jobtype != null) ? JobType.valueOf(jobtype.toUpperCase()) : null;
         Specification<Job> spec = (root, query, criteriaBuilder) -> {
             Predicate predicate = criteriaBuilder.conjunction();
             if(title != null){
@@ -141,14 +142,12 @@ public class JobService {
             }
             return predicate;
         };
-        List<Job> filteredJobs = jobRepository.findAll(spec);
+        Page<Job> filteredJobs = jobRepository.findAll(spec, pageable);
         if(filteredJobs.isEmpty()){
             throw new RuntimeException("No Jobs Found");
         }
         else {
-            return filteredJobs.stream()
-                    .map(this::mapToResponseDto)
-                    .collect(Collectors.toList());
+            return filteredJobs.map(this::mapToResponseDto);
         }
     }
     private JobResponseDto mapToResponseDto(Job job) {
@@ -216,12 +215,10 @@ public class JobService {
 
     }
 
-    public List<Job> searchJobs(String keyword) {
-        List<Job> jobs = jobRepository.searchJobs(keyword);
-        return jobs;
+    public Page<Job> searchJobs(String keyword, Pageable pageable) {
+        return jobRepository.searchJobs(keyword, pageable);
     }
-
-    public List<Job> jobsByRecruiter(HttpServletRequest request) {
+    public Page<Job> jobsByRecruiter(HttpServletRequest request, Pageable pageable) {
         final String authHeader = request.getHeader("Authorization");
         final String username;
         String token = authHeader.replace("Bearer ", "");
@@ -234,30 +231,28 @@ public class JobService {
         Optional<Recruiter> recruiterOptional = recruiterRepository.findByUser(user.get());
         Recruiter recruiter = recruiterOptional.get();
 
-        List<Job> jobs = jobRepository.findByPostedById(recruiter.getId());
+        Page<Job> jobs = jobRepository.findByPostedById(recruiter.getId(), pageable);
         return jobs;
 
     }
 
-    public List<JobApplication> applicationByCandidate(HttpServletRequest request) {
+    public Page<JobApplication> applicationByCandidate(HttpServletRequest request, Pageable pageable) {
         final String authHeader = request.getHeader("Authorization");
         final String username;
         String token = authHeader.replace("Bearer ", "");
         username = Jwtservice.extractusername(token);
 
         Optional<User> user = userRepository.findByUsername(username);
-        if(user.isPresent() && !user.get().getRole().equals(Role.CANDIDATE)) {
+        if (user.isPresent() && !user.get().getRole().equals(Role.CANDIDATE)) {
             throw new RuntimeException("Invalid User (only candidates allowed)");
         }
 
         Candidate applicant = candidateRepository.findByUser(user);
-        List<JobApplication> applications = jobApplicationRepository.findByApplicantId(applicant.getId());
-        return applications;
+        return jobApplicationRepository.findByApplicantId(applicant.getId(), pageable);
     }
 
-    public List<JobApplication> applicationsForJob(Long jobId) {
-        List<JobApplication> applications = jobApplicationRepository.findByJobId(jobId);
-        return applications;
+    public Page<JobApplication> applicationsForJob(Long jobId, Pageable pageable) {
+        return jobApplicationRepository.findByJobId(jobId, pageable);
     }
 
     public void updateStatus(Long applicationId, StatusDto status) {
@@ -374,11 +369,8 @@ public class JobService {
     }
 
 
-    public List<JobResponseDto> getAllJobs() {
-    List<Job> jobs = jobRepository.findAll();
-    return jobs.stream()
-            .map(this::mapToResponseDto)
-            .collect(Collectors.toList());
+    public Page<JobResponseDto> getAllJobs(Pageable pageable) {
+        return jobRepository.findAll(pageable).map(this::mapToResponseDto);
     }
 
 }

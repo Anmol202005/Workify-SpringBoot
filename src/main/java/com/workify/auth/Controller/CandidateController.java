@@ -8,6 +8,9 @@ import com.workify.auth.service.AuthService;
 import com.workify.auth.service.CandidateService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,9 +42,8 @@ public class CandidateController {
     }
 
     @GetMapping("/get-all")
-    public ResponseEntity<List<GetResponse>> getAllCandidates() {
-        List<GetResponse> candidates = candidateService.getAllCandidates();
-        return ResponseEntity.ok(candidates);
+    public ResponseEntity<Page<GetResponse>> getAllCandidates(@PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(candidateService.getAllCandidates(pageable));
     }
 
 

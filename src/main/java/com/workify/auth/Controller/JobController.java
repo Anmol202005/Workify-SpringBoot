@@ -1,5 +1,7 @@
 package com.workify.auth.Controller;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import com.workify.auth.models.ApplicationStatus;
 import com.workify.auth.models.Job;
 import com.workify.auth.models.JobApplication;
@@ -11,6 +13,7 @@ import com.workify.auth.models.dto.StatusDto;
 import com.workify.auth.service.JobService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,8 +37,8 @@ public class JobController {
                 .build());
     }
     @GetMapping("/all-jobs")
-    public ResponseEntity<?> getAllJobs() {
-        List<JobResponseDto> jobs = jobService.getAllJobs();
+    public ResponseEntity<Page<JobResponseDto>> getAllJobs(@PageableDefault(size = 10) Pageable pageable) {
+        Page<JobResponseDto> jobs = jobService.getAllJobs(pageable);
         return ResponseEntity.ok(jobs);
     }
     @GetMapping("/filter/title")
@@ -49,7 +52,7 @@ public class JobController {
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<List<JobResponseDto>> filterJobs(@RequestParam(required = false) String title,
+    public ResponseEntity<Page<JobResponseDto>> filterJobs(@RequestParam(required = false) String title,
                                                            @RequestParam(required = false) String location,
                                                            @RequestParam(required = false) Integer experience,
                                                            @RequestParam(required = false) Integer minSalary,
@@ -57,8 +60,9 @@ public class JobController {
                                                            @RequestParam(required = false) String employmentType,
                                                            @RequestParam(required = false) List<String> requiredSkills,
                                                            @RequestParam(required = false) String jobType,
-                                                           @RequestParam(required = false)Mode mode) {
-        return ResponseEntity.ok(jobService.filterJobs(title, location, minSalary, maxSalary, experience,  requiredSkills,jobType,mode));
+                                                           @RequestParam(required = false)Mode mode,
+                                                            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(jobService.filterJobs(title, location, minSalary, maxSalary, experience,  requiredSkills,jobType,mode,pageable));
     }
     @PostMapping("apply/applications/{jobId}")
     public ResponseEntity<ResponseMessage> getJob(@PathVariable long jobId,HttpServletRequest request) {
@@ -68,22 +72,23 @@ public class JobController {
                 .build());
     }
     @GetMapping("/search")
-    public ResponseEntity<List<Job>> searchJobs(@RequestParam String search) {
-
-        return ResponseEntity.ok(jobService.searchJobs(search));
+    public ResponseEntity<Page<Job>> searchJobs(@RequestParam String search, @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(jobService.searchJobs(search, pageable));
     }
+
     @GetMapping("/recruiter")
-    public ResponseEntity<List<Job>> getJobsByRecruiter(HttpServletRequest request) {
-        return ResponseEntity.ok(jobService.jobsByRecruiter(request));
+    public ResponseEntity<Page<Job>> getJobsByRecruiter(HttpServletRequest request, @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(jobService.jobsByRecruiter(request, pageable));
     }
 
-    @GetMapping("/applications/candidate") //(applications applied by candidate)
-    public ResponseEntity<List<JobApplication>> getApplicationsByCandidate(HttpServletRequest request) {
-        return ResponseEntity.ok(jobService.applicationByCandidate(request));
+    @GetMapping("/applications/candidate")
+    public ResponseEntity<Page<JobApplication>> getApplicationsByCandidate(HttpServletRequest request, @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(jobService.applicationByCandidate(request, pageable));
     }
+
     @GetMapping("/applications/{jobId}")
-    public ResponseEntity<List<JobApplication>> getApplicationsForJob(@PathVariable Long jobId) {
-        return ResponseEntity.ok(jobService.applicationsForJob(jobId));
+    public ResponseEntity<Page<JobApplication>> getApplicationsForJob(@PathVariable Long jobId, @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(jobService.applicationsForJob(jobId, pageable));
     }
     @PostMapping("/application/update-status/{applicationId}")
     public ResponseEntity<ResponseMessage> updateApplicationStatus(@PathVariable Long applicationId, @RequestBody StatusDto status) {

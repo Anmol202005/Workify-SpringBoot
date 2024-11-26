@@ -96,11 +96,9 @@ public class RecruiterService {
         }
     }
 @Transactional
-public List<RecruiterDto> getAllRecruitersDto(Pageable pageable) {
+public Page<RecruiterDto> getAllRecruitersDto(Pageable pageable) {
     Page<Recruiter> recruiters = recruiterRepository.findAll(pageable);
-    return recruiters.stream()
-            .map(this::convertRecruiterToDto)
-            .collect(Collectors.toList());
+    return recruiterRepository.findAll(pageable).map(this::convertRecruiterToDto);
 }
 
 private RecruiterDto convertRecruiterToDto(Recruiter recruiter) {
