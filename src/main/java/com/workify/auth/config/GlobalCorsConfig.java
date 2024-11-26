@@ -12,14 +12,13 @@ public class GlobalCorsConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin("*"); // Replace with allowed origin
-        config.addAllowedMethod("*"); // Allows all HTTP methods
-        config.addAllowedHeader("*"); // Allows all headers
-        config.setAllowCredentials(false); // Allows cookies
+        config.addAllowedOriginPattern("*"); // Use specific origins in production
+        config.addAllowedMethod("*");       // Allows all HTTP methods (GET, POST, etc.)
+        config.addAllowedHeader("*");       // Allows all headers
+        config.setAllowCredentials(true);   // Allow cookies/credentials if needed
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
 }
-

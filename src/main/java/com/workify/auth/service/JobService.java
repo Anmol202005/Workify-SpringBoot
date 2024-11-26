@@ -153,12 +153,15 @@ public class JobService {
     }
     private JobResponseDto mapToResponseDto(Job job) {
         return new JobResponseDto(
+                job.getId(),
                 job.getTitle(),
                 job.getDescription(),
                 job.getLocation(),
                 job.getExperience(),
                 job.getMinSalary(),
                 job.getMaxSalary(),
+                job.getMode(),
+                job.getJobType(),
                 new ArrayList<>(job.getRequiredSkills())
         );
     }
@@ -377,4 +380,5 @@ public class JobService {
             .map(this::mapToResponseDto)
             .collect(Collectors.toList());
     }
+
 }

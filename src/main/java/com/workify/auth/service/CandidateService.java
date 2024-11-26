@@ -8,11 +8,9 @@ import com.workify.auth.models.*;
 import com.workify.auth.models.dto.CandidateDTO;
 import com.workify.auth.models.dto.GetResponse;
 import com.workify.auth.repository.*;
-import com.workify.auth.repository.community.CommunityRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -45,8 +43,7 @@ public class CandidateService {
     private EducationRepository educationRepository;
     @Autowired
     private ExperienceRepository experienceRepository;
-    @Autowired
-    private CommunityRepository communityRepository;
+
 
     public CandidateService(AmazonS3 amazonS3) {
         this.amazonS3 = amazonS3;

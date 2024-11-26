@@ -1,45 +1,29 @@
 package com.workify.auth.service;
 
-import com.workify.auth.models.community.ChatMessage;
-import com.workify.auth.models.community.Community;
+import com.workify.auth.models.ChatMessage;
+import com.workify.auth.models.ChatNotification;
 import com.workify.auth.repository.community.ChatMessageRepository;
-import com.workify.auth.repository.community.CommunityRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ChatMessageService {
+    private final ChatMessageRepository chatMessageRepository;
+    private final ChatRoomService chatRoomService;
 
-    @Autowired
-    private ChatMessageRepository chatMessageRepository;
+    public ChatMessage save(ChatMessage chatMessage) {
+        var chatId=chatRoomService.getChatRoomId(chatMessage.getSenderId(), chatMessage.getRecipientId(),true).orElseThrow();
+        chatMessage.setChatId(chatId);
+        return chatMessageRepository.save(chatMessage);
+    }
+    public List<ChatMessage> findChatMessages(String senderId, String recipientId) {
+        var chatId=chatRoomService.getChatRoomId(senderId, recipientId, true);
+        return chatId.map(chatMessageRepository::findByChatId).orElse(new ArrayList<>());
 
-    @Autowired
-    private CommunityRepository communityRepository;
-
-    public ChatMessage sendMessage(Long communityId, ChatMessage message) {
-        Community community = communityRepository.findById(communityId)
-                .orElseThrow(() -> new IllegalArgumentException("Community not found"));
-
-        if (!community.getMembers().contains(message.getSender())) {
-            throw new IllegalArgumentException("User is not a member of this community.");
-        }
-
-        message.setCommunity(community);
-        message.setTimestamp(LocalDateTime.now());
-        return chatMessageRepository.save(message);
     }
 
-    public List<ChatMessage> getChatHistory(Long communityId, String userId) {
-        Community community = communityRepository.findById(communityId)
-                .orElseThrow(() -> new IllegalArgumentException("Community not found"));
-
-        if (!community.getMembers().contains(userId)) {
-            throw new IllegalArgumentException("Access denied: User is not a member of this community.");
-        }
-
-        return chatMessageRepository.findByCommunityId(communityId);
-    }
 }

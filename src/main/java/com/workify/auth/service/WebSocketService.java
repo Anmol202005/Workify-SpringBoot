@@ -1,7 +1,9 @@
 package com.workify.auth.service;
 
+import com.workify.auth.models.ChatUser;
 import com.workify.auth.models.Status;
 import com.workify.auth.models.User;
+import com.workify.auth.repository.ChatUserRepository;
 import com.workify.auth.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -14,17 +16,19 @@ import java.util.List;
 @AllArgsConstructor
 public class WebSocketService {
     private final UserRepository userRepository;
-    public void saveuser(User user){
+    private final ChatUserRepository chatUserRepository;
+
+    public void saveuser(ChatUser user){
 
         user.setStatus(Status.ONLINE);
-         userRepository.save(user);
+         chatUserRepository.save(user);
     }
-    public void disconnect(User user){
+    public void disconnect(ChatUser user){
 
         user.setStatus(Status.OFFLINE);
-        userRepository.save(user);
+        chatUserRepository.save(user);
     }
-    public List<User> findConnectedUser(){
-        return userRepository.findByStatus(Status.ONLINE);
+    public List<ChatUser> findConnectedUser(){
+        return chatUserRepository.findByStatus(Status.ONLINE);
     }
 }

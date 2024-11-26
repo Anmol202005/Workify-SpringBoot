@@ -1,23 +1,21 @@
 package com.workify.auth.models;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.*;
 
-import java.lang.annotation.Documented;
+import java.sql.Time;
+import java.util.Date;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity
-public class ChatRoom {
-   @Id
+public class ChatNotification  {
     private String id;
-    private String chatId;
     private String senderId;
     private String recipientId;
+    private String content;
+
 }
