@@ -72,22 +72,23 @@ public class JobController {
                 .build());
     }
     @GetMapping("/search")
-    public ResponseEntity<List<Job>> searchJobs(@RequestParam String search) {
-
-        return ResponseEntity.ok(jobService.searchJobs(search));
+    public ResponseEntity<Page<Job>> searchJobs(@RequestParam String search, @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(jobService.searchJobs(search, pageable));
     }
+
     @GetMapping("/recruiter")
-    public ResponseEntity<List<Job>> getJobsByRecruiter(HttpServletRequest request) {
-        return ResponseEntity.ok(jobService.jobsByRecruiter(request));
+    public ResponseEntity<Page<Job>> getJobsByRecruiter(HttpServletRequest request, @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(jobService.jobsByRecruiter(request, pageable));
     }
 
-    @GetMapping("/applications/candidate") //(applications applied by candidate)
-    public ResponseEntity<List<JobApplication>> getApplicationsByCandidate(HttpServletRequest request) {
-        return ResponseEntity.ok(jobService.applicationByCandidate(request));
+    @GetMapping("/applications/candidate")
+    public ResponseEntity<Page<JobApplication>> getApplicationsByCandidate(HttpServletRequest request, @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(jobService.applicationByCandidate(request, pageable));
     }
+
     @GetMapping("/applications/{jobId}")
-    public ResponseEntity<List<JobApplication>> getApplicationsForJob(@PathVariable Long jobId) {
-        return ResponseEntity.ok(jobService.applicationsForJob(jobId));
+    public ResponseEntity<Page<JobApplication>> getApplicationsForJob(@PathVariable Long jobId, @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(jobService.applicationsForJob(jobId, pageable));
     }
     @PostMapping("/application/update-status/{applicationId}")
     public ResponseEntity<ResponseMessage> updateApplicationStatus(@PathVariable Long applicationId, @RequestBody StatusDto status) {
