@@ -1,8 +1,10 @@
 package com.workify.auth.Controller;
 import com.workify.auth.models.Candidate;
+import com.workify.auth.models.User;
 import com.workify.auth.models.dto.ResponseMessage;
 import com.workify.auth.models.dto.CandidateDTO;
 import com.workify.auth.models.dto.GetResponse;
+import com.workify.auth.service.AuthService;
 import com.workify.auth.service.CandidateService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,8 @@ public class CandidateController {
 
     @Autowired
     private CandidateService candidateService;
+    @Autowired
+    private AuthService service;
 
 
     @PostMapping("/create")
@@ -154,6 +158,10 @@ public class CandidateController {
         return ResponseEntity.ok(ResponseMessage.builder()
                 .message("Portfolio uploaded successfully")
                 .build());
+    }
+    @GetMapping("/get-userDetails")
+    public ResponseEntity<User> getUserDetails(){
+        return ResponseEntity.ok(service.getUserDetail());
     }
 }
 

@@ -1,5 +1,6 @@
 package com.workify.auth.Controller;
 
+import com.workify.auth.models.User;
 import com.workify.auth.models.dto.*;
 import com.workify.auth.service.AuthService;
 import jakarta.mail.MessagingException;
@@ -52,4 +53,5 @@ public class AuthController {
     ){
         return service.verifyOtpForgotPassword(request);
     }
+
 }
