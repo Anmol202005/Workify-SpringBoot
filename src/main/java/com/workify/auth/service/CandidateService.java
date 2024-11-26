@@ -11,6 +11,8 @@ import com.workify.auth.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -58,11 +60,11 @@ public class CandidateService {
         certificateRepository.deleteById(certificateId);
     }
 
-    public List<GetResponse> getAllCandidates() {
-        List<Candidate> candidates = candidateRepository.findAll();
+    public Page<GetResponse> getAllCandidates(Pageable pageable) {
+        Page<Candidate> candidates = candidateRepository.findAll(pageable);
 
         // Map each Candidate to GetResponse
-        return candidates.stream().map(candidate -> {
+        return candidates.map(candidate -> {
             GetResponse getResponse = new GetResponse();
             getResponse.setFirstName(candidate.getUser().getFirstName());
             getResponse.setLastName(candidate.getUser().getLastName());
@@ -76,9 +78,8 @@ public class CandidateService {
             getResponse.setResumeKey(candidate.getResumeKey());
             getResponse.setProfileImageKey(candidate.getProfileImageKey());
             return getResponse;
-        }).collect(Collectors.toList());
+        });
     }
-
 
 
     public GetResponse getCandidateById(Long id) {

@@ -1,6 +1,8 @@
 package com.workify.auth.repository;
 import com.workify.auth.models.Candidate;
 import com.workify.auth.models.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,5 +17,5 @@ public interface CandidateRepository extends JpaRepository<Candidate,Long >  {
             "WHERE LOWER(skill) IN :keywords")
     List<Candidate> findCandidatesBySkills(@Param("keywords") List<String> keywords);
     Boolean existsByUser(Optional<User> user);
-
+    Page<Candidate> findAll(Pageable pageable);
 }
