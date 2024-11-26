@@ -218,7 +218,7 @@ public class JobService {
     public Page<Job> searchJobs(String keyword, Pageable pageable) {
         return jobRepository.searchJobs(keyword, pageable);
     }
-    public Page<Job> jobsByRecruiter(HttpServletRequest request, Pageable pageable) {
+    public Page<JobResponseDto> jobsByRecruiter(HttpServletRequest request, Pageable pageable) {
         final String authHeader = request.getHeader("Authorization");
         final String username;
         String token = authHeader.replace("Bearer ", "");
@@ -231,10 +231,10 @@ public class JobService {
         Optional<Recruiter> recruiterOptional = recruiterRepository.findByUser(user.get());
         Recruiter recruiter = recruiterOptional.get();
 
-        Page<Job> jobs = jobRepository.findByPostedById(recruiter.getId(), pageable);
-        return jobs;
-
+     //   Page<Job> jobs = jobRepository.findByPostedById(recruiter.getId(), pageable);
+        return jobRepository.findByPostedById(recruiter.getId(), pageable).map(this::mapToResponseDto);
     }
+
 
     public Page<JobApplication> applicationByCandidate(HttpServletRequest request, Pageable pageable) {
         final String authHeader = request.getHeader("Authorization");

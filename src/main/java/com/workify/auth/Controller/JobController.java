@@ -77,7 +77,7 @@ public class JobController {
     }
 
     @GetMapping("/recruiter")
-    public ResponseEntity<Page<Job>> getJobsByRecruiter(HttpServletRequest request, @PageableDefault(size = 10) Pageable pageable) {
+    public ResponseEntity<Page<JobResponseDto>> getJobsByRecruiter(HttpServletRequest request, @PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(jobService.jobsByRecruiter(request, pageable));
     }
 
