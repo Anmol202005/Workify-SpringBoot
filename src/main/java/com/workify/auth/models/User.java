@@ -44,7 +44,7 @@ public class User implements UserDetails {
     @JsonIgnore
     private String password;
     @Enumerated(EnumType.STRING)
-    @JsonBackReference
+
     private Role role;
     @JsonIgnore
     private String otp;

@@ -159,6 +159,7 @@ public class AuthService {
         return ResponseEntity.ok(AuthenticationResponse.builder()
                 .token(jwtToken)
                 .message("Login successful")
+                .user(user)
                 .build());
 
     }
