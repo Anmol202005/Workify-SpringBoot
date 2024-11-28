@@ -17,5 +17,4 @@ public interface CandidateRepository extends JpaRepository<Candidate,Long >  {
             "WHERE LOWER(skill) IN :keywords")
     List<Candidate> findCandidatesBySkills(@Param("keywords") List<String> keywords);
     Boolean existsByUser(Optional<User> user);
-    Page<Candidate> findAll(Pageable pageable);
 }

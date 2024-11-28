@@ -20,8 +20,8 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
             "LOWER(j.description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(j.location) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(skill) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    Page<Job> searchJobs(String keyword, Pageable pageable);
-    Page<Job> findByPostedById(Long recruiterId, Pageable pageable);
+    List<Job> searchJobs(String keyword);
+    List<Job> findByPostedById(Long recruiterId);
     void deleteByPostedBy(Recruiter recruiter);
 
     Iterable<Object> findByPostedBy(Recruiter recruiter);

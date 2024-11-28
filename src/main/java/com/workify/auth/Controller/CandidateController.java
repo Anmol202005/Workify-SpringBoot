@@ -42,9 +42,11 @@ public class CandidateController {
     }
 
     @GetMapping("/get-all")
-    public ResponseEntity<Page<GetResponse>> getAllCandidates(@PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(candidateService.getAllCandidates(pageable));
+    public ResponseEntity<List<GetResponse>> getAllCandidates() {
+        List<GetResponse> candidates = candidateService.getAllCandidates();
+        return ResponseEntity.ok(candidates);
     }
+
 
 
     @GetMapping("/get/{id}")

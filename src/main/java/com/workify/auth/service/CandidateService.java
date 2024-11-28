@@ -60,11 +60,11 @@ public class CandidateService {
         certificateRepository.deleteById(certificateId);
     }
 
-    public Page<GetResponse> getAllCandidates(Pageable pageable) {
-        Page<Candidate> candidates = candidateRepository.findAll(pageable);
+    public List<GetResponse> getAllCandidates() {
+        List<Candidate> candidates = candidateRepository.findAll();
 
         // Map each Candidate to GetResponse
-        return candidates.map(candidate -> {
+        return candidates.stream().map(candidate -> {
             GetResponse getResponse = new GetResponse();
             getResponse.setFirstName(candidate.getUser().getFirstName());
             getResponse.setLastName(candidate.getUser().getLastName());
@@ -78,8 +78,9 @@ public class CandidateService {
             getResponse.setResumeKey(candidate.getResumeKey());
             getResponse.setProfileImageKey(candidate.getProfileImageKey());
             return getResponse;
-        });
+        }).collect(Collectors.toList());
     }
+
 
 
     public GetResponse getCandidateById(Long id) {

@@ -57,32 +57,32 @@ public class RecruiterController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Page<RecruiterDto>> getAllRecruiters(@PageableDefault(size = 10) Pageable pageable) {
-        Page<RecruiterDto> recruiters = recruiterService.getAllRecruitersDto(pageable);
+    public ResponseEntity<List<RecruiterDto>> getAllRecruiters() {
+        List<RecruiterDto> recruiters = recruiterService.getAllRecruitersDto();
         return ResponseEntity.ok(recruiters);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<Recruiter>> searchRecruiters(@RequestParam String keyword, Pageable pageable) {
-        return ResponseEntity.ok(recruiterService.searchRecruiters(keyword, pageable));
+    public ResponseEntity<List<Recruiter>> searchRecruiters(@RequestParam String keyword) {
+        return ResponseEntity.ok(recruiterService.searchRecruiters(keyword));
     }
 
     @GetMapping("/search/companyName")
-    public ResponseEntity<Page<Recruiter>> searchByCompanyName(@RequestParam String companyName, Pageable pageable) {
-        return ResponseEntity.ok(recruiterService.searchByCompanyName(companyName, pageable));
+    public ResponseEntity<List<Recruiter>> searchByCompanyName(@RequestParam String companyName) {
+        return ResponseEntity.ok(recruiterService.searchByCompanyName(companyName));
     }
     @GetMapping("/current-recruiter")
     public ResponseEntity<GetResponseRecruiter> getCurrentRecruiter() {
         return ResponseEntity.ok(recruiterService.getCurrentRecruiter());
     }
     @GetMapping("/search/jobTitle")
-    public ResponseEntity<Page<Recruiter>> searchByJobTitle(@RequestParam String jobTitle, Pageable pageable) {
-        return ResponseEntity.ok(recruiterService.searchByJobTitle(jobTitle, pageable));
+    public ResponseEntity<List<Recruiter>> searchByJobTitle(@RequestParam String jobTitle) {
+        return ResponseEntity.ok(recruiterService.searchByJobTitle(jobTitle));
     }
 
     @GetMapping("/search/industry")
-    public ResponseEntity<Page<Recruiter>> searchByIndustry(@RequestParam String industry, Pageable pageable) {
-        return ResponseEntity.ok(recruiterService.searchByIndustry(industry, pageable));
+    public ResponseEntity<List<Recruiter>> searchByIndustry(@RequestParam String industry) {
+        return ResponseEntity.ok(recruiterService.searchByIndustry(industry));
     }
     @PostMapping("/Profile-picture")
     public ResponseEntity<ResponseMessage> uploadProfilePicture(

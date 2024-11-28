@@ -96,9 +96,11 @@ public class RecruiterService {
         }
     }
 @Transactional
-public Page<RecruiterDto> getAllRecruitersDto(Pageable pageable) {
-    Page<Recruiter> recruiters = recruiterRepository.findAll(pageable);
-    return recruiterRepository.findAll(pageable).map(this::convertRecruiterToDto);
+public List<RecruiterDto> getAllRecruitersDto() {
+    List<Recruiter> recruiters = recruiterRepository.findAll();
+    return recruiters.stream()
+            .map(this::convertRecruiterToDto)
+            .collect(Collectors.toList());
 }
 
 private RecruiterDto convertRecruiterToDto(Recruiter recruiter) {
@@ -133,24 +135,24 @@ private RecruiterDto convertRecruiterToDto(Recruiter recruiter) {
         }
     }
 
-    public Page<Recruiter> getAllRecruiters(Pageable pageable) {
-        return recruiterRepository.findAll(pageable);
+    public List<Recruiter> getAllRecruiters() {
+        return recruiterRepository.findAll();
     }
 
-    public Page<Recruiter> searchRecruiters(String keyword, Pageable pageable) {
-        return recruiterRepository.findByCompanyNameContainingOrJobTitleContainingOrIndustryContaining(keyword, keyword, keyword, pageable);
+    public List<Recruiter> searchRecruiters(String keyword) {
+        return recruiterRepository.findByCompanyNameContainingOrJobTitleContainingOrIndustryContaining(keyword, keyword, keyword);
     }
 
-    public Page<Recruiter> searchByCompanyName(String companyName, Pageable pageable) {
-        return recruiterRepository.findByCompanyNameContaining(companyName, pageable);
+    public List<Recruiter> searchByCompanyName(String companyName) {
+        return recruiterRepository.findByCompanyNameContaining(companyName);
     }
 
-    public Page<Recruiter> searchByJobTitle(String jobTitle, Pageable pageable) {
-        return recruiterRepository.findByJobTitleContaining(jobTitle, pageable);
+    public List<Recruiter> searchByJobTitle(String jobTitle) {
+        return recruiterRepository.findByJobTitleContaining(jobTitle);
     }
 
-    public Page<Recruiter> searchByIndustry(String industry, Pageable pageable) {
-        return recruiterRepository.findByIndustryContaining(industry, pageable);
+    public List<Recruiter> searchByIndustry(String industry) {
+        return recruiterRepository.findByIndustryContaining(industry);
     }
 
     public Optional<Recruiter> getRecruiterByUserId(Long userId) {

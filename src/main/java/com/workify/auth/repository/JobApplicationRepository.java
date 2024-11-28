@@ -9,8 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface JobApplicationRepository extends JpaRepository<JobApplication, Long> {
-    Page<JobApplication> findByApplicantId(Long applicantId, Pageable pageable);
-    Page<JobApplication> findByJobId(Long jobId, Pageable pageable);
+    List<JobApplication> findByApplicantId(Long applicantId);
+    List<JobApplication> findByJobId(Long jobId);
     Boolean existsByJobAndApplicant(Job job, Candidate candidate);
 
     void deleteByJobId(Long jobId);
