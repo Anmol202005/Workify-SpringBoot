@@ -270,13 +270,21 @@ public class JobService {
 
                 ApplicationStatus applicationStatus = ApplicationStatus.valueOf(status.getStatus().toUpperCase());
                 if(applicationStatus.equals(ApplicationStatus.REJECTED)) {
+
                     sendRejectedEmailToCandidate(applicant.getUser().getEmail(), applicant.getUser().getFirstName(),applicant.getUser().getLastName(),jobApplication.getJob().getCompany());
                 }
                 else if(applicationStatus.equals(ApplicationStatus.ACCEPTED)) {
+                    Notification notification = new Notification();
+                    notification.setTitle("Application Accepted");
+                    notification.setMessage("Congratulations! Your resume has been shortlisted. A confirmation email has been sent to you.");
+                    notification.setUser(applicant.getUser());
+                    notificationRepository.save(notification);
                     sendAcceptedEmailToCandidate(applicant.getUser().getEmail(), applicant.getUser().getFirstName(),applicant.getUser().getLastName(),jobApplication.getJob().getCompany());
                 }
                 //sendAcceptedEmailToCandidate(applicant.getUser().getEmail(), applicant.getUser().getFirstName(),applicant.getUser().getLastName(),jobApplication.getJob().getCompany());
                 jobApplication.setStatus(applicationStatus);
+
+
                 jobApplicationRepository.save(jobApplication);
             }
             else {
