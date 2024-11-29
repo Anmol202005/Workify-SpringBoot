@@ -60,7 +60,7 @@ public class JobController {
                                                            @RequestParam(required = false) String employmentType,
                                                            @RequestParam(required = false) List<String> requiredSkills,
                                                            @RequestParam(required = false) String jobType,
-                                                           @RequestParam(required = false)Mode mode) {
+                                                           @RequestParam(required = false)String mode) {
         return ResponseEntity.ok(jobService.filterJobs(title, location, minSalary, maxSalary, experience,  requiredSkills,jobType,mode));
     }
     @PostMapping("apply/applications/{jobId}")

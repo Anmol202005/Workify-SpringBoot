@@ -23,6 +23,6 @@ public class JobDto {
     private Integer maxSalary;
     @ElementCollection
     private List<String> requiredSkills;
-    private JobType jobType;
-    private Mode mode;
+    private String jobType;
+    private String mode;
 }

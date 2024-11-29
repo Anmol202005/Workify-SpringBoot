@@ -76,8 +76,8 @@ public class JobService {
             job.setLocation(jobDto.getLocation());
             job.setExperience(jobDto.getExperience());
             job.setRequiredSkills(jobDto.getRequiredSkills());
-            job.setJobType(jobDto.getJobType());
-            job.setMode(jobDto.getMode());
+            job.setJobType(JobType.valueOf(jobDto.getJobType().toUpperCase()));
+            job.setMode(Mode.valueOf(jobDto.getMode().toUpperCase()));
             List<Candidate> candidates=candidateRepository.findCandidatesBySkills(jobDto.getRequiredSkills());
             for (Candidate candidate : candidates) {
                 Notification notification = new Notification();
@@ -99,8 +99,9 @@ public class JobService {
         return jobRepository.findByLocationContaining(location);
     }
 
-    public List<JobResponseDto> filterJobs(String title, String location, Integer minSalary, Integer maxSalary, Integer experience, List<String> requiredSkills,String jobtype,Mode mode) {
-        final JobType type = (jobtype != null) ? JobType.valueOf(jobtype.toUpperCase()) : null;
+    public List<JobResponseDto> filterJobs(String title, String location, Integer minSalary, Integer maxSalary, Integer experience, List<String> requiredSkills,String jobtypei,String modei) {
+        final JobType type = (jobtypei != null) ? JobType.valueOf(jobtypei.toUpperCase()) : null;
+        final Mode mode = (modei != null) ? Mode.valueOf(modei.toUpperCase()) : null;
         Specification<Job> spec = (root, query, criteriaBuilder) -> {
             Predicate predicate = criteriaBuilder.conjunction();
             if(title != null){
