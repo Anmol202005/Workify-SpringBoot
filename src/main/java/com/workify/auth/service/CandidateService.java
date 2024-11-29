@@ -124,18 +124,18 @@ public class CandidateService {
         }
 
         // Update Education
-        if (candidateDTO.getEducations() != null) {
+        if (candidateDTO.getEducation() != null) {
             candidate.getEducation().clear();
-            for (Education education : candidateDTO.getEducations()) {
+            for (Education education : candidateDTO.getEducation()) {
                 education.setCandidate(candidate);
                 candidate.getEducation().add(education);
             }
         }
 
         // Update Experience
-        if (candidateDTO.getExperiences() != null) {
+        if (candidateDTO.getExperience() != null) {
             candidate.getExperiences().clear();
-            for (Experience experience : candidateDTO.getExperiences()) {
+            for (Experience experience : candidateDTO.getExperience()) {
                 experience.setCandidate(candidate);
                 candidate.getExperiences().add(experience);
             }
@@ -196,7 +196,7 @@ public class CandidateService {
         candidate.setSkills(candidateDTO.getSkill());
         candidate.setDOB(candidateDTO.getDOB());
         candidate.setUser(user.orElse(null));
-        List<Education> educations = candidateDTO.getEducations();
+        List<Education> educations = candidateDTO.getEducation();
         if (educations != null) {
             for (Education education : educations) {
                 education.setCandidate(candidate);
@@ -204,7 +204,7 @@ public class CandidateService {
             candidate.setEducation(educations);
         }
 
-        List<Experience> experiences = candidateDTO.getExperiences();
+        List<Experience> experiences = candidateDTO.getExperience();
         if (experiences != null) {
             for (Experience experience: experiences) {
                 experience.setCandidate(candidate);

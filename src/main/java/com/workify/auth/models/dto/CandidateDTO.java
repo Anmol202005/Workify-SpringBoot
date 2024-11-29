@@ -15,8 +15,8 @@ import java.util.List;
 @Setter
 @ToString
 public class CandidateDTO {
-    private List<Education> educations;
-    private List<Experience> experiences;
+    private List<Education> education;
+    private List<Experience> experience;
     private List<String> skill;
     private LocalDate DOB;
 }
