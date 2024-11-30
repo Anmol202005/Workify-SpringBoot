@@ -30,11 +30,12 @@ public class Candidate {
     private User user;
     @ElementCollection
     private List<String> skills;
-
     private LocalDate DOB;
+    private String domain;
     private URL resumeKey;
     private URL portfolioKey;
     private URL profileImageKey;
+    private String location;
 
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "candidate")

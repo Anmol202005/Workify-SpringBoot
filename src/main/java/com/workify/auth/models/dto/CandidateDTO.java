@@ -19,4 +19,6 @@ public class CandidateDTO {
     private List<Experience> experience;
     private List<String> skill;
     private LocalDate DOB;
+    private String domain;
+    private String location;
 }
