@@ -209,6 +209,7 @@ public class AuthService {
             var jwtToken = jwtService.generateToken(user);
             return ResponseEntity.ok(AuthenticationResponse.builder()
                     .message("Account has been registered successfully")
+                    .user(user)
                     .token(jwtToken)
                     .build());
         }else {
