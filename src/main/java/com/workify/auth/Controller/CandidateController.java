@@ -56,11 +56,8 @@ public class CandidateController {
         return ResponseEntity.ok(candidate);
     }
 
-    @GetMapping("/statistics")
-public ResponseEntity<Map<String, Long>> getStatistics(HttpServletRequest request) {
-    Map<String, Long> statistics = candidateService.getStatistics(request);
-    return ResponseEntity.ok(statistics);
-}
+
+
 
     @PatchMapping ("/update")
     public ResponseEntity<ResponseMessage> updateCandidate( @RequestBody CandidateDTO candidateDTO, HttpServletRequest request) {

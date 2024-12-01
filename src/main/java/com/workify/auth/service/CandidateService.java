@@ -87,13 +87,8 @@ public class CandidateService {
     }
 
 
-public Map<String, Long> getStatistics(HttpServletRequest request) {
-    final String authHeader = request.getHeader("Authorization");
-    final String username;
-    String token = authHeader.replace("Bearer ", "");
-    username=Jwtservice.extractusername(token);
+public Map<String, Long> getStatistics() {
 
-    Optional<User> user= userRepository.findByUsername(username);
     Map<String, Long> statistics = new HashMap<>();
     long numberOfCandidates = candidateRepository.count();
     long numberOfRecruiters = recruiterRepository.count();

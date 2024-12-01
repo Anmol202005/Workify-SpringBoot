@@ -60,8 +60,8 @@ public class AuthController {
         return service.verifyOtpForgotPassword(request);
     }
     @GetMapping("/statistics")
-    public ResponseEntity<Map<String, Long>> getStatistics(HttpServletRequest request) {
-        Map<String, Long> statistics = candidateService.getStatistics(request);
+    public ResponseEntity<Map<String, Long>> getStatistics() {
+        Map<String, Long> statistics = candidateService.getStatistics();
         return ResponseEntity.ok(statistics);
     }
 
