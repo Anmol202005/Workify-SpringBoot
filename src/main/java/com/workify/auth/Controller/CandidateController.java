@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/candidates")
@@ -55,7 +56,11 @@ public class CandidateController {
         return ResponseEntity.ok(candidate);
     }
 
-
+    @GetMapping("/statistics")
+public ResponseEntity<Map<String, Long>> getStatistics(HttpServletRequest request) {
+    Map<String, Long> statistics = candidateService.getStatistics(request);
+    return ResponseEntity.ok(statistics);
+}
 
     @PatchMapping ("/update")
     public ResponseEntity<ResponseMessage> updateCandidate( @RequestBody CandidateDTO candidateDTO, HttpServletRequest request) {

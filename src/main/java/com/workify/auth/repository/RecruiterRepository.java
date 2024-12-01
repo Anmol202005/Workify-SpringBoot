@@ -20,4 +20,5 @@ public interface RecruiterRepository extends JpaRepository<Recruiter, Long> {
     Optional<Recruiter> findByUser(User user);
 
     boolean existsByUser(Optional<User> user);
+    long count();
 }

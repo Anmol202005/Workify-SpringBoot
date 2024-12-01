@@ -25,4 +25,5 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
     void deleteByPostedBy(Recruiter recruiter);
 
     Iterable<Object> findByPostedBy(Recruiter recruiter);
+    long count();
 }

@@ -21,9 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,7 +43,12 @@ public class CandidateService {
     private EducationRepository educationRepository;
     @Autowired
     private ExperienceRepository experienceRepository;
-
+    @Autowired
+    private RecruiterRepository recruiterRepository;
+    @Autowired
+    private JobRepository jobRepository;
+    @Autowired
+    private JobApplicationRepository jobApplicationRepository;
 
     public CandidateService(AmazonS3 amazonS3) {
         this.amazonS3 = amazonS3;
@@ -82,7 +85,26 @@ public class CandidateService {
     }
 
 
+public Map<String, Long> getStatistics(HttpServletRequest request) {
+    final String authHeader = request.getHeader("Authorization");
+    final String username;
+    String token = authHeader.replace("Bearer ", "");
+    username=Jwtservice.extractusername(token);
 
+    Optional<User> user= userRepository.findByUsername(username);
+    Map<String, Long> statistics = new HashMap<>();
+    long numberOfCandidates = candidateRepository.count();
+    long numberOfRecruiters = recruiterRepository.count();
+    long numberOfJobsPostedByRecruiters = jobRepository.count();
+    //long numberOfJobsAppliedByCurrentCandidate = jobApplicationRepository.countByCandidate(candidateRepository.findByUser(user));
+
+    statistics.put("numberOfCandidates", numberOfCandidates);
+    statistics.put("numberOfRecruiters", numberOfRecruiters);
+    statistics.put("total jobs", numberOfJobsPostedByRecruiters);
+   // statistics.put("numberOfJobsAppliedByCurrentCandidate", numberOfJobsAppliedByCurrentCandidate);
+
+    return statistics;
+}
     public GetResponse getCandidateById(Long id) {
         var candidate = candidateRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Candidate not found with id " + id));
