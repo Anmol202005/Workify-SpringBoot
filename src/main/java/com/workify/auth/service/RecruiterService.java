@@ -182,7 +182,7 @@ private RecruiterDto convertRecruiterToDto(Recruiter recruiter) {
         username=Jwtservice.extractusername(token);
 
         Optional<User> user= userRepository.findByUsername(username);
-        var recruiter = recruiterRepository.findByUser(user.get());
+
         String contentType = image.getContentType();
         if (!isAllowedProfilePictureFormat(contentType)) {
             throw new RuntimeException("Invalid file format. Only PNG, JPG, and JPEG files are allowed.");
@@ -192,8 +192,8 @@ private RecruiterDto convertRecruiterToDto(Recruiter recruiter) {
         if (image.getSize() > MAX_PROFILE_PIC_SIZE) {
             throw new RuntimeException("File size exceeds the maximum limit of 2 MB.");
         }
-        if(recruiter.get().getProfileImage()!=null) {
-            amazonS3.deleteObject(bucketName, getKeyFromUrl(recruiter.get().getProfileImage().toString()));
+        if(user.get().getProfileImageKey()!=null) {
+            amazonS3.deleteObject(bucketName, getKeyFromUrl(user.get().getProfileImageKey().toString()));
 
         }
         String fileName = "profilepic"+user.get().getId() + "/" + image.getOriginalFilename();
@@ -206,8 +206,13 @@ private RecruiterDto convertRecruiterToDto(Recruiter recruiter) {
 
         amazonS3.putObject(bucketName, fileName, image.getInputStream(), metadata);
 
-        recruiter.get().setProfileImage(new URL("https://anmol-workify-private.s3.ap-south-1.amazonaws.com/"+fileName.replace(" ", "+")));
-        recruiterRepository.save(recruiter.get());
+        user.get().setProfileImageKey(new URL("https://anmol-workify-private.s3.ap-south-1.amazonaws.com/"+fileName.replace(" ", "+")));
+        userRepository.save(user.get());
+        if(recruiterRepository.existsByUser(user)){
+            var recruiter = recruiterRepository.findByUser(user.get());
+            recruiter.get().setProfileImage(user.get().getProfileImageKey());
+            recruiterRepository.save(recruiter.get());
+        }
 
     }
     private Recruiter convertDtoToRecruiter(RecruiterDto recruiterDto, Optional<User> user) {
@@ -219,6 +224,7 @@ private RecruiterDto convertRecruiterToDto(Recruiter recruiter) {
         recruiter.setCompanyWebsite(recruiterDto.getCompanyWebsite());
         recruiter.setCompanyLocation(recruiterDto.getCompanyLocation());
         recruiter.setIndustry(recruiterDto.getIndustry());
+        recruiter.setProfileImage(user.get().getProfileImageKey());
         recruiterRepository.save(recruiter);
         return recruiter;
     }
