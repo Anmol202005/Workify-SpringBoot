@@ -25,4 +25,6 @@ public class GetResponse {
     private URL resumeKey;
     private URL profileImageKey;
     private LocalDate DOB;
+    private String domain;
+    private String location;
 }

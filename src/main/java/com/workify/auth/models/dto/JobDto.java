@@ -25,4 +25,5 @@ public class JobDto {
     private List<String> requiredSkills;
     private String jobType;
     private String mode;
+
 }

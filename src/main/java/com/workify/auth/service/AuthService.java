@@ -136,10 +136,17 @@ public class AuthService {
     }
 
     public ResponseEntity authenticate(AuthenticationRequest request) {
+
 //
         if(!repository.existsByUsername(request.getContact().toLowerCase())){ return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(AuthenticationResponse.builder()
                 .message("User does not exist")
                 .build());}
+        var user = repository.findByUsername(request.getContact()).orElseThrow();
+        if(user.getVerified()==false){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(AuthenticationResponse.builder()
+                    .message("User does not exist")
+                    .build());
+        }
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -151,8 +158,8 @@ public class AuthService {
                     .build());
         }
 
-        var user = repository.findByUsername(request.getContact()).orElseThrow();
-        user.setVerified(true);
+
+
         repository.save(user);
 
         var jwtToken = jwtService.generateToken(user);
@@ -194,6 +201,7 @@ public class AuthService {
                 .message("Invalid Contact")
                 .build());}
         var user=repository.findByUsername(request.getContact()).orElseThrow();
+
         long minuteElapsed = ChronoUnit.MINUTES.between(user.getOtpGenerated(), LocalDateTime.now());
         if(user.getOtp().equals(request.getOtp()) && minuteElapsed < 5){
             user.setVerified(true);
@@ -201,6 +209,7 @@ public class AuthService {
             var jwtToken = jwtService.generateToken(user);
             return ResponseEntity.ok(AuthenticationResponse.builder()
                     .message("Account has been registered successfully")
+                    .user(user)
                     .token(jwtToken)
                     .build());
         }else {

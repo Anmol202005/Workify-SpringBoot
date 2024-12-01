@@ -80,6 +80,8 @@ public class CandidateService {
             getResponse.setCertificate(candidate.getCertificates());
             getResponse.setResumeKey(candidate.getResumeKey());
             getResponse.setProfileImageKey(candidate.getProfileImageKey());
+            getResponse.setDomain(candidate.getDomain());
+            getResponse.setLocation(candidate.getLocation());
             return getResponse;
         }).collect(Collectors.toList());
     }
@@ -122,6 +124,8 @@ public Map<String, Long> getStatistics(HttpServletRequest request) {
         getResponse.setCertificate(candidate.getCertificates());
         getResponse.setResumeKey(candidate.getResumeKey());
         getResponse.setProfileImageKey(candidate.getProfileImageKey());
+        getResponse.setDomain(candidate.getDomain());
+        getResponse.setLocation(candidate.getLocation());
 
         return getResponse;
     }
@@ -161,6 +165,12 @@ public Map<String, Long> getStatistics(HttpServletRequest request) {
                 experience.setCandidate(candidate);
                 candidate.getExperiences().add(experience);
             }
+        }
+        if(candidateDTO.getDomain() != null) {
+            candidate.setDomain(candidateDTO.getDomain());
+        }
+        if(candidateDTO.getLocation() != null) {
+            candidate.setLocation(candidateDTO.getLocation());
         }
 
         return candidateRepository.save(candidate);
@@ -217,6 +227,8 @@ public Map<String, Long> getStatistics(HttpServletRequest request) {
         Candidate candidate = new Candidate();
         candidate.setSkills(candidateDTO.getSkill());
         candidate.setDOB(candidateDTO.getDOB());
+        candidate.setDomain(candidateDTO.getDomain());
+        candidate.setLocation(candidateDTO.getLocation());
         candidate.setUser(user.orElse(null));
         List<Education> educations = candidateDTO.getEducation();
         if (educations != null) {
@@ -448,6 +460,8 @@ public Map<String, Long> getStatistics(HttpServletRequest request) {
         getResponse.setCertificate(candidate.getCertificates());
         getResponse.setResumeKey(candidate.getResumeKey());
         getResponse.setProfileImageKey(candidate.getProfileImageKey());
+        getResponse.setDomain(candidate.getDomain());
+        getResponse.setLocation(candidate.getLocation());
 
         return getResponse;
     }
