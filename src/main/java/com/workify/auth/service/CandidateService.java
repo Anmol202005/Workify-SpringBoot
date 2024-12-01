@@ -98,11 +98,18 @@ public Map<String, Long> getStatistics(HttpServletRequest request) {
     long numberOfCandidates = candidateRepository.count();
     long numberOfRecruiters = recruiterRepository.count();
     long numberOfJobsPostedByRecruiters = jobRepository.count();
+    long numberOfRegisteredUsers = userRepository.count();
+    long numberOfJobApplications = jobApplicationRepository.count();
+    long numberOfAcceptedJobApplications=jobApplicationRepository.countByStatus(ApplicationStatus.ACCEPTED);
     //long numberOfJobsAppliedByCurrentCandidate = jobApplicationRepository.countByCandidate(candidateRepository.findByUser(user));
 
     statistics.put("numberOfCandidates", numberOfCandidates);
     statistics.put("numberOfRecruiters", numberOfRecruiters);
     statistics.put("total jobs", numberOfJobsPostedByRecruiters);
+    statistics.put("total registered users", numberOfRegisteredUsers);
+    statistics.put("total job applications", numberOfJobApplications);
+    statistics.put("total accepted job applications", numberOfAcceptedJobApplications);
+
    // statistics.put("numberOfJobsAppliedByCurrentCandidate", numberOfJobsAppliedByCurrentCandidate);
 
     return statistics;
@@ -230,6 +237,7 @@ public Map<String, Long> getStatistics(HttpServletRequest request) {
         candidate.setDomain(candidateDTO.getDomain());
         candidate.setLocation(candidateDTO.getLocation());
         candidate.setUser(user.orElse(null));
+        candidate.setProfileImageKey(user.get().getProfileImageKey());
         List<Education> educations = candidateDTO.getEducation();
         if (educations != null) {
             for (Education education : educations) {
@@ -367,7 +375,7 @@ public Map<String, Long> getStatistics(HttpServletRequest request) {
         username=Jwtservice.extractusername(token);
 
         Optional<User> user= userRepository.findByUsername(username);
-        var candidate = candidateRepository.findByUser(user);
+
         String contentType = image.getContentType();
         if (!isAllowedProfilePictureFormat(contentType)) {
             throw new RuntimeException("Invalid file format. Only PNG, JPG, and JPEG files are allowed.");
@@ -377,8 +385,8 @@ public Map<String, Long> getStatistics(HttpServletRequest request) {
         if (image.getSize() > MAX_PROFILE_PIC_SIZE) {
             throw new RuntimeException("File size exceeds the maximum limit of 2 MB.");
         }
-        if(candidate.getProfileImageKey()!=null) {
-            amazonS3.deleteObject(bucketName, getKeyFromUrl(candidate.getProfileImageKey().toString()));
+        if(user.get().getProfileImageKey()!=null) {
+            amazonS3.deleteObject(bucketName, getKeyFromUrl(user.get().getProfileImageKey().toString()));
 
         }
         String fileName = "profilepic"+user.get().getId() + "/" + image.getOriginalFilename();
@@ -391,8 +399,13 @@ public Map<String, Long> getStatistics(HttpServletRequest request) {
 
         amazonS3.putObject(bucketName, fileName, image.getInputStream(), metadata);
 
-        candidate.setProfileImageKey(new URL("https://anmol-workify-private.s3.ap-south-1.amazonaws.com/"+fileName.replace(" ", "+")));
-        candidateRepository.save(candidate);
+        user.get().setProfileImageKey(new URL("https://anmol-workify-private.s3.ap-south-1.amazonaws.com/"+fileName.replace(" ", "+")));
+        userRepository.save(user.get());
+        if(candidateRepository.existsByUser(user)) {
+            var candidate = candidateRepository.findByUser(user);
+            candidate.setProfileImageKey(user.get().getProfileImageKey());
+            candidateRepository.save(candidate);
+        }
 
     }
     @Transactional

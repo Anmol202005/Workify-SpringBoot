@@ -1,5 +1,6 @@
 package com.workify.auth.repository;
 
+import com.workify.auth.models.ApplicationStatus;
 import com.workify.auth.models.Candidate;
 import com.workify.auth.models.Job;
 import com.workify.auth.models.JobApplication;
@@ -14,5 +15,6 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
     Boolean existsByJobAndApplicant(Job job, Candidate candidate);
 
     void deleteByJobId(Long jobId);
+    long countByStatus(ApplicationStatus status);
     //long countByCandidate(Candidate candidate);
 }
