@@ -16,5 +16,7 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
 
     void deleteByJobId(Long jobId);
     long countByStatus(ApplicationStatus status);
+
+    void deleteByApplicant(Candidate candidate);
     //long countByCandidate(Candidate candidate);
 }

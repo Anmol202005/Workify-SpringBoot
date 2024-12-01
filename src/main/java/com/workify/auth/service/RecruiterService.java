@@ -114,7 +114,7 @@ private RecruiterDto convertRecruiterToDto(Recruiter recruiter) {
     return dto;
 }
     @Transactional
-    public void deleteRecruiterProfile(HttpServletRequest id) {
+    public void deleteRecruiterProfile(HttpServletRequest id) throws Exception {
         final String authHeader = id.getHeader("Authorization");
         final String username;
         String token = authHeader.replace("Bearer ", "");
@@ -127,6 +127,11 @@ private RecruiterDto convertRecruiterToDto(Recruiter recruiter) {
                 jobApplicationRepository.deleteByJobId(((Job)job).getId());
             });
             user.get().setRole(Role.USER);
+            if(user.get().getProfileImageKey()!=null) {
+                amazonS3.deleteObject(bucketName, getKeyFromUrl(user.get().getProfileImageKey().toString()));
+
+            }
+            user.get().setProfileImageKey(null);
             userRepository.save(user.get());
             jobRepository.deleteByPostedBy(recruiter.get());
             recruiterRepository.delete(recruiter.get());

@@ -69,7 +69,7 @@ public class CandidateController {
 
 
     @DeleteMapping("/delete")
-    public ResponseEntity<ResponseMessage> deleteCandidate(HttpServletRequest request) {
+    public ResponseEntity<ResponseMessage> deleteCandidate(HttpServletRequest request) throws Exception {
         candidateService.deleteCandidate(request);
         return ResponseEntity.ok(ResponseMessage.builder()
                 .message("Candidate deleted successfully").build());

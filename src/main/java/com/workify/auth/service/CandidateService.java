@@ -192,7 +192,7 @@ public Map<String, Long> getStatistics() {
 //
 
 @Transactional
-    public void deleteCandidate(HttpServletRequest request) {
+    public void deleteCandidate(HttpServletRequest request) throws Exception {
         final String authHeader = request.getHeader("Authorization");
         final String username;
         String token = authHeader.replace("Bearer ", "");
@@ -203,7 +203,14 @@ public Map<String, Long> getStatistics() {
         var candidate = candidateRepository.findByUser(user);
         certificateRepository.deleteAllByCandidate(candidate);
         experienceRepository.deleteAllByCandidate(candidate);
+        jobApplicationRepository.deleteByApplicant(candidate);
+    if(user.get().getProfileImageKey()!=null) {
+        amazonS3.deleteObject(bucketName, getKeyFromUrl(user.get().getProfileImageKey().toString()));
+
+    }
+
         candidateRepository.delete(candidate);
+        user.get().setProfileImageKey(null);
         userRepository.save(user.get());
 
     }
