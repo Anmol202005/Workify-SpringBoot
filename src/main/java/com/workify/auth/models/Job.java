@@ -38,6 +38,7 @@ public class Job {
     @ManyToOne
     @JoinColumn(name = "recruiter_id", nullable = false)
     private Recruiter postedBy;
+    private JobStatus jobStatus;
 
 
 }

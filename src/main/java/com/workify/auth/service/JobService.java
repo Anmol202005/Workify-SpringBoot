@@ -78,6 +78,7 @@ public class JobService {
             job.setRequiredSkills(jobDto.getRequiredSkills());
             job.setJobType(JobType.valueOf(jobDto.getJobType().toUpperCase()));
             job.setMode(Mode.valueOf(jobDto.getMode().toUpperCase()));
+            job.setJobStatus(JobStatus.OPEN);
             List<Candidate> candidates=candidateRepository.findCandidatesBySkills(jobDto.getRequiredSkills());
             for (Candidate candidate : candidates) {
                 Notification notification = new Notification();
@@ -99,9 +100,11 @@ public class JobService {
         return jobRepository.findByLocationContaining(location);
     }
 
-    public List<JobResponseDto> filterJobs(String title, String location, Integer minSalary, Integer maxSalary, Integer experience, List<String> requiredSkills,String jobtypei,String modei) {
+    public List<JobResponseDto> filterJobs(String title, String location, Integer minSalary, Integer maxSalary, Integer experience, List<String> requiredSkills,String jobtypei,String modei,String jobStatusi) {
         final JobType type = (jobtypei != null) ? JobType.valueOf(jobtypei.toUpperCase()) : null;
         final Mode mode = (modei != null) ? Mode.valueOf(modei.toUpperCase()) : null;
+        final JobStatus status = (jobStatusi != null) ? JobStatus.valueOf(jobStatusi.toUpperCase()) : null;
+
         Specification<Job> spec = (root, query, criteriaBuilder) -> {
             Predicate predicate = criteriaBuilder.conjunction();
             if(title != null){
@@ -141,6 +144,10 @@ public class JobService {
                 predicate=criteriaBuilder.and(predicate,
                         criteriaBuilder.equal(root.get("mode"),mode));
             }
+            if(status!=null){
+                predicate=criteriaBuilder.and(predicate,
+                        criteriaBuilder.equal(root.get("jobStatus"),status));
+            }
             return predicate;
         };
         List<Job> filteredJobs = jobRepository.findAll(spec);
@@ -164,6 +171,7 @@ public class JobService {
                 job.getMaxSalary(),
                 job.getMode(),
                 job.getJobType(),
+                job.getJobStatus(),
                 new ArrayList<>(job.getRequiredSkills())
         );
     }
@@ -385,6 +393,32 @@ public class JobService {
         return jobs.stream()
                 .map(this::mapToResponseDto)
                 .collect(Collectors.toList());
+    }
+    public Job updateJob(Long jobId, JobDto partialJob) {
+        Optional<Job> existingJobOpt = jobRepository.findById(jobId);
+
+        if (existingJobOpt.isPresent()) {
+            Job existingJob = existingJobOpt.get();
+
+            // Update only the fields that are not null in partialJob
+            if (partialJob.getTitle() != null) existingJob.setTitle(partialJob.getTitle());
+            if (partialJob.getDescription() != null) existingJob.setDescription(partialJob.getDescription());
+            if (partialJob.getCompany() != null) existingJob.setCompany(partialJob.getCompany());
+            if (partialJob.getLocation() != null) existingJob.setLocation(partialJob.getLocation());
+            if (partialJob.getExperience() != null) existingJob.setExperience(partialJob.getExperience());
+            if (partialJob.getIndustry() != null) existingJob.setIndustry(partialJob.getIndustry());
+            if (partialJob.getJobType() != null) existingJob.setJobType(JobType.valueOf(partialJob.getJobType().toUpperCase()));
+            if (partialJob.getMode() != null) existingJob.setMode(Mode.valueOf(partialJob.getMode().toUpperCase()));
+            if (partialJob.getMinSalary() != null) existingJob.setMinSalary(partialJob.getMinSalary());
+            if (partialJob.getMaxSalary() != null) existingJob.setMaxSalary(partialJob.getMaxSalary());
+            if (partialJob.getRequiredSkills() != null) existingJob.setRequiredSkills(partialJob.getRequiredSkills());
+            if (partialJob.getJobStatus() != null) existingJob.setJobStatus(JobStatus.valueOf(partialJob.getJobStatus()));
+
+            // Save and return updated job
+            return jobRepository.save(existingJob);
+        } else {
+            throw new RuntimeException("Job with ID " + jobId + " not found.");
+        }
     }
 
 }

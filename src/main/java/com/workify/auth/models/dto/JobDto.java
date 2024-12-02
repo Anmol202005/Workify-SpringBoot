@@ -1,5 +1,6 @@
 package com.workify.auth.models.dto;
 
+import com.workify.auth.models.JobStatus;
 import com.workify.auth.models.JobType;
 import com.workify.auth.models.Mode;
 import jakarta.persistence.ElementCollection;
@@ -21,9 +22,12 @@ public class JobDto {
     private Integer Experience;
     private Integer minSalary;
     private Integer maxSalary;
+    private String company;
+    private String industry;
     @ElementCollection
     private List<String> requiredSkills;
     private String jobType;
     private String mode;
+    private String jobStatus;
 
 }
