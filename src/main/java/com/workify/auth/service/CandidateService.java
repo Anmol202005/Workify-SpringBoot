@@ -96,14 +96,15 @@ public Map<String, Long> getStatistics() {
     long numberOfRegisteredUsers = userRepository.count();
     long numberOfJobApplications = jobApplicationRepository.count();
     long numberOfAcceptedJobApplications=jobApplicationRepository.countByStatus(ApplicationStatus.ACCEPTED);
+    long liveJobs = jobRepository.countByJobStatus(JobStatus.OPEN);
     //long numberOfJobsAppliedByCurrentCandidate = jobApplicationRepository.countByCandidate(candidateRepository.findByUser(user));
 
-    statistics.put("numberOfCandidates", numberOfCandidates);
-    statistics.put("numberOfRecruiters", numberOfRecruiters);
-    statistics.put("total jobs", numberOfJobsPostedByRecruiters);
-    statistics.put("total registered users", numberOfRegisteredUsers);
-    statistics.put("total job applications", numberOfJobApplications);
-    statistics.put("total accepted job applications", numberOfAcceptedJobApplications);
+    statistics.put("candidatesCount", numberOfCandidates);
+    statistics.put("companiesCount", numberOfRecruiters);
+    statistics.put("newJobCount", numberOfJobsPostedByRecruiters);
+    statistics.put("liveJobCount", liveJobs);
+//    statistics.put("total job applications", numberOfJobApplications);
+//    statistics.put("total accepted job applications", numberOfAcceptedJobApplications);
 
    // statistics.put("numberOfJobsAppliedByCurrentCandidate", numberOfJobsAppliedByCurrentCandidate);
 

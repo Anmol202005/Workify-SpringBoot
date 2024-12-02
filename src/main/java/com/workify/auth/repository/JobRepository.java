@@ -1,6 +1,7 @@
 package com.workify.auth.repository;
 
 import com.workify.auth.models.Job;
+import com.workify.auth.models.JobStatus;
 import com.workify.auth.models.Recruiter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,4 +27,5 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
 
     Iterable<Object> findByPostedBy(Recruiter recruiter);
     long count();
+    long countByJobStatus(JobStatus jobStatus);
 }
