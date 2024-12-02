@@ -400,13 +400,11 @@ public class JobService {
         if (existingJobOpt.isPresent()) {
             Job existingJob = existingJobOpt.get();
 
-            // Update only the fields that are not null in partialJob
+
             if (partialJob.getTitle() != null) existingJob.setTitle(partialJob.getTitle());
             if (partialJob.getDescription() != null) existingJob.setDescription(partialJob.getDescription());
-            if (partialJob.getCompany() != null) existingJob.setCompany(partialJob.getCompany());
             if (partialJob.getLocation() != null) existingJob.setLocation(partialJob.getLocation());
             if (partialJob.getExperience() != null) existingJob.setExperience(partialJob.getExperience());
-            if (partialJob.getIndustry() != null) existingJob.setIndustry(partialJob.getIndustry());
             if (partialJob.getJobType() != null) existingJob.setJobType(JobType.valueOf(partialJob.getJobType().toUpperCase()));
             if (partialJob.getMode() != null) existingJob.setMode(Mode.valueOf(partialJob.getMode().toUpperCase()));
             if (partialJob.getMinSalary() != null) existingJob.setMinSalary(partialJob.getMinSalary());
@@ -414,7 +412,7 @@ public class JobService {
             if (partialJob.getRequiredSkills() != null) existingJob.setRequiredSkills(partialJob.getRequiredSkills());
             if (partialJob.getJobStatus() != null) existingJob.setJobStatus(JobStatus.valueOf(partialJob.getJobStatus()));
 
-            // Save and return updated job
+
             return jobRepository.save(existingJob);
         } else {
             throw new RuntimeException("Job with ID " + jobId + " not found.");

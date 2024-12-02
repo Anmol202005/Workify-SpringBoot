@@ -22,8 +22,7 @@ public class JobDto {
     private Integer Experience;
     private Integer minSalary;
     private Integer maxSalary;
-    private String company;
-    private String industry;
+
     @ElementCollection
     private List<String> requiredSkills;
     private String jobType;

@@ -97,4 +97,11 @@ public class JobController {
                 .message("Status updated successfully")
                 .build());
     }
+    @PatchMapping("/{id}")
+    public ResponseEntity<ResponseMessage> patchJob(@PathVariable Long id, @RequestBody JobDto partialJob) {
+         jobService.updateJob(id, partialJob);
+        return ResponseEntity.ok(ResponseMessage.builder()
+                .message("Job updated successfully")
+                .build());
+    }
 }
