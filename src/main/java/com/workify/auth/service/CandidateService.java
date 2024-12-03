@@ -516,6 +516,10 @@ public Map<String, Long> getStatistics() {
         candidateRepository.save(candidate);
 
     }
+
+    public List<Candidate> searchCandidates(String search) {
+        return candidateRepository.findBySkillsContainingOrDomainContainingOrLocationContaining(search, search, search);
+    }
 }
 
 

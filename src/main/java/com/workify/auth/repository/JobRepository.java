@@ -24,7 +24,6 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
     List<Job> searchJobs(String keyword);
     List<Job> findByPostedById(Long recruiterId);
     void deleteByPostedBy(Recruiter recruiter);
-
     Iterable<Object> findByPostedBy(Recruiter recruiter);
     long count();
     long countByJobStatus(JobStatus jobStatus);

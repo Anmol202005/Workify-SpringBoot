@@ -1,5 +1,6 @@
 package com.workify.auth.Controller;
 import com.workify.auth.models.Candidate;
+import com.workify.auth.models.Job;
 import com.workify.auth.models.User;
 import com.workify.auth.models.dto.ResponseMessage;
 import com.workify.auth.models.dto.CandidateDTO;
@@ -41,7 +42,10 @@ public class CandidateController {
                 .message("Candidate created successfully")
                 .build());
     }
-
+    @GetMapping("/search")
+    public ResponseEntity<List<Candidate>> searchCandidates(@RequestParam String search) {
+        return ResponseEntity.ok(candidateService.searchCandidates(search));
+    }
     @GetMapping("/get-all")
     public ResponseEntity<List<GetResponse>> getAllCandidates() {
         List<GetResponse> candidates = candidateService.getAllCandidates();

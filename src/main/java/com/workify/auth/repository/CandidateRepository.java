@@ -18,4 +18,6 @@ public interface CandidateRepository extends JpaRepository<Candidate,Long >  {
     List<Candidate> findCandidatesBySkills(@Param("keywords") List<String> keywords);
     Boolean existsByUser(Optional<User> user);
     long count();
+
+    List<Candidate> findBySkillsContainingOrDomainContainingOrLocationContaining(String search, String search1, String search2);
 }
