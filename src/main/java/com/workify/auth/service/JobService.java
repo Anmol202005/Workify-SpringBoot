@@ -19,9 +19,7 @@ import org.springframework.data.domain.Pageable;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 //import java.util.function.Predicate;
 import jakarta.persistence.criteria.Predicate;
@@ -410,13 +408,31 @@ public class JobService {
             if (partialJob.getMinSalary() != null) existingJob.setMinSalary(partialJob.getMinSalary());
             if (partialJob.getMaxSalary() != null) existingJob.setMaxSalary(partialJob.getMaxSalary());
             if (partialJob.getRequiredSkills() != null) existingJob.setRequiredSkills(partialJob.getRequiredSkills());
-            if (partialJob.getJobStatus() != null) existingJob.setJobStatus(JobStatus.valueOf(partialJob.getJobStatus()));
+            if (partialJob.getJobStatus() != null) existingJob.setJobStatus(JobStatus.valueOf(partialJob.getJobStatus().toUpperCase()));
 
 
             return jobRepository.save(existingJob);
         } else {
             throw new RuntimeException("Job with ID " + jobId + " not found.");
         }
+    }
+    public List<Job> recommendJobs(Candidate candidate, List<Job> jobs) {
+        return jobs.stream()
+                .sorted(Comparator.comparing((Job job) -> job.getLocation().equalsIgnoreCase(candidate.getLocation()) ? 0 : 1) // Location match first
+                        .thenComparing(job -> calculateSkillMatch(candidate.getSkills(), job.getRequiredSkills()), Comparator.reverseOrder()) // Skill match next
+                        .thenComparing(Job::getMaxSalary, Comparator.reverseOrder())) // Salary match last
+                .collect(Collectors.toList());
+    }
+    private int calculateSkillMatch(List<String> candidateSkills, List<String> jobSkills) {
+        Set<String> uniqueSkills = new HashSet<>(candidateSkills);
+        uniqueSkills.retainAll(jobSkills);
+        return uniqueSkills.size(); // Return number of matching skills
+    }
+    public List<Job> recommendedJobsForCandidate(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        var candidate=candidateRepository.findByUser(Optional.ofNullable(currentUser));
+        return recommendJobs(candidate,jobRepository.findAll());
     }
 
 }

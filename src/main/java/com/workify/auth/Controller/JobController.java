@@ -104,4 +104,16 @@ public class JobController {
                 .message("Job updated successfully")
                 .build());
     }
+    @PutMapping("/{jobId}")  // PUT request for updating a job
+    public ResponseEntity<Job> updateJob(
+            @PathVariable Long jobId,  // Extract jobId from URL
+            @RequestBody JobDto partialJob) {  // Extract partialJob from request body
+
+        Job updatedJob = jobService.updateJob(jobId, partialJob);  // Call the service layer
+        return ResponseEntity.ok(updatedJob);  // Return the updated job as the response
+    }
+    @GetMapping("/get-recommended-Jobs")
+    public ResponseEntity<List<Job>> getRecommendedJobs() {
+        return ResponseEntity.ok(jobService.recommendedJobsForCandidate());
+    }
 }
