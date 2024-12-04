@@ -52,7 +52,7 @@ public class JobController {
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<List<JobResponseDto>> filterJobs(@RequestParam(required = false) String title,
+    public ResponseEntity<List<Job>> filterJobs(@RequestParam(required = false) String title,
                                                            @RequestParam(required = false) String location,
                                                            @RequestParam(required = false) Integer experience,
                                                            @RequestParam(required = false) Integer minSalary,
