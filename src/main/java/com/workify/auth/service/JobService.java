@@ -431,5 +431,8 @@ public class JobService {
         var candidate=candidateRepository.findByUser(Optional.ofNullable(currentUser));
         return recommendJobs(candidate,jobRepository.findAll());
     }
+    public Job getJobsById(long jobId) {
+        return jobRepository.findById(jobId).get();
+    }
 
 }
