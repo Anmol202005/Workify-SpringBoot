@@ -37,8 +37,8 @@ public class JobController {
                 .build());
     }
     @GetMapping("/all-jobs")
-    public ResponseEntity<List<JobResponseDto>> getAllJobs() {
-        List<JobResponseDto> jobs = jobService.getAllJobs();
+    public ResponseEntity<List<Job>> getAllJobs() {
+        List<Job> jobs = jobService.getAllJobs();
         return ResponseEntity.ok(jobs);
     }
     @GetMapping("/filter/title")

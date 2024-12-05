@@ -386,10 +386,9 @@ public class JobService {
     }
 
 
-    public List<JobResponseDto> getAllJobs() {
+    public List<Job> getAllJobs() {
         List<Job> jobs = jobRepository.findAll();
         return jobs.stream()
-                .map(this::mapToResponseDto)
                 .collect(Collectors.toList());
     }
     public Job updateJob(Long jobId, JobDto partialJob) {
