@@ -98,7 +98,7 @@ public class JobService {
         return jobRepository.findByLocationContaining(location);
     }
 
-    public List<JobResponseDto> filterJobs(String title, String location, Integer minSalary, Integer maxSalary, Integer experience, List<String> requiredSkills,String jobtypei,String modei,String jobStatusi) {
+    public List<Job> filterJobs(String title, String location, Integer minSalary, Integer maxSalary, Integer experience, List<String> requiredSkills,String jobtypei,String modei,String jobStatusi) {
         final JobType type = (jobtypei != null) ? JobType.valueOf(jobtypei.toUpperCase()) : null;
         final Mode mode = (modei != null) ? Mode.valueOf(modei.toUpperCase()) : null;
         final JobStatus status = (jobStatusi != null) ? JobStatus.valueOf(jobStatusi.toUpperCase()) : null;
@@ -153,9 +153,7 @@ public class JobService {
             throw new RuntimeException("No Jobs Found");
         }
         else {
-            return filteredJobs.stream()
-                    .map(this::mapToResponseDto)
-                    .collect(Collectors.toList());
+            return filteredJobs;
         }
     }
     private JobResponseDto mapToResponseDto(Job job) {
@@ -425,7 +423,7 @@ public class JobService {
     private int calculateSkillMatch(List<String> candidateSkills, List<String> jobSkills) {
         Set<String> uniqueSkills = new HashSet<>(candidateSkills);
         uniqueSkills.retainAll(jobSkills);
-        return uniqueSkills.size(); // Return number of matching skills
+        return uniqueSkills.size();
     }
     public List<Job> recommendedJobsForCandidate(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
