@@ -81,9 +81,11 @@ public class AuthService {
             long minuteElapsed = user.getRegisterRequestTimer() != null
                     ? ChronoUnit.SECONDS.between(user.getRegisterRequestTimer(), LocalDateTime.now())
                     : 60;
-            if(minuteElapsed<30){return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
+            if(minuteElapsed<30){System.out.println(minuteElapsed);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Can't send request before 30 seconds")
-                    .build());}
+                    .build());
+            }
 
 
             user.setFirstName(request.getFirstName());
