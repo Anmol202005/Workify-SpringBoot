@@ -2,6 +2,7 @@ package com.workify.auth.service;
 
 import com.workify.auth.models.dto.ResponseMessage;
 import jakarta.mail.internet.MimeMessage;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -14,9 +15,12 @@ public class EmailService {
     public EmailService(JavaMailSender mailSender){
         this.mailSender=mailSender;
     }
+    @Value("${MAIL_USERNAME}")
+    String email;
     public ResponseEntity sendEmail(String to, String subject, String body,Boolean ishtml) {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper;
+
         try {
             helper = new MimeMessageHelper(message, true);
             helper.setTo(to);
@@ -32,7 +36,7 @@ public class EmailService {
             // Handle any other exceptions
             System.err.println("An unexpected error occurred: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                    .message("Either invalid Email or connection issue")
+                    .message(email)
                     .build());
         }
     }}
