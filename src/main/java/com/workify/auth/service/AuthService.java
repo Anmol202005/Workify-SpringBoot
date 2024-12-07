@@ -224,7 +224,7 @@ public class AuthService {
 
     public ResponseEntity forgotPassword(String contact)  {
 //
-        if(!repository.existsByUsername(contact)){
+        if(!repository.existsByUsernameAndVerified(contact,true)){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
                     .message("Contact not registered")
                     .build());

@@ -36,7 +36,7 @@ public class EmailService {
             // Handle any other exceptions
             System.err.println("An unexpected error occurred: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseMessage.builder()
-                    .message(email)
+                    .message("Network Issue")
                     .build());
         }
     }}
