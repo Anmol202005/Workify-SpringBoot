@@ -18,8 +18,10 @@ import java.util.Set;
 @Table(name = "jobs")
 public class Job {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "short_id_seq")
+    @SequenceGenerator(name = "short_id_seq", sequenceName = "short_id_seq", allocationSize = 1, initialValue = 1000)
     private Long id;
+
 
     private String title;
     private String description;

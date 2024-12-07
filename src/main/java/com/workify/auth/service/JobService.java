@@ -216,8 +216,8 @@ public class JobService {
                 " at " + jobLocation +
                 " on " + appliedDate + " at " + appliedTime;
 
-        sendEmailToRecruiter(recruiterEmail, subject, applicant.getResumeKey(), applicant.getPortfolioKey());
-        sendEmailToCandidate(applicant.getUser().getEmail(), applicant.getUser().getFirstName(),applicant.getUser().getLastName(),job.getCompany());
+//        sendEmailToRecruiter(recruiterEmail, subject, applicant.getResumeKey(), applicant.getPortfolioKey());
+//        sendEmailToCandidate(applicant.getUser().getEmail(), applicant.getUser().getFirstName(),applicant.getUser().getLastName(),job.getCompany());
         jobApplicationRepository.save(jobApplication);
 
     }
@@ -275,7 +275,7 @@ public class JobService {
                 ApplicationStatus applicationStatus = ApplicationStatus.valueOf(status.getStatus().toUpperCase());
                 if(applicationStatus.equals(ApplicationStatus.REJECTED)) {
 
-                    sendRejectedEmailToCandidate(applicant.getUser().getEmail(), applicant.getUser().getFirstName(),applicant.getUser().getLastName(),jobApplication.getJob().getCompany());
+//                    sendRejectedEmailToCandidate(applicant.getUser().getEmail(), applicant.getUser().getFirstName(),applicant.getUser().getLastName(),jobApplication.getJob().getCompany());
                 }
                 else if(applicationStatus.equals(ApplicationStatus.ACCEPTED)) {
                     Notification notification = new Notification();
@@ -283,7 +283,7 @@ public class JobService {
                     notification.setMessage("Congratulations! Your resume has been shortlisted. A confirmation email has been sent to you.");
                     notification.setUser(applicant.getUser());
                     notificationRepository.save(notification);
-                    sendAcceptedEmailToCandidate(applicant.getUser().getEmail(), applicant.getUser().getFirstName(),applicant.getUser().getLastName(),jobApplication.getJob().getCompany());
+//                    sendAcceptedEmailToCandidate(applicant.getUser().getEmail(), applicant.getUser().getFirstName(),applicant.getUser().getLastName(),jobApplication.getJob().getCompany());
                 }
                 //sendAcceptedEmailToCandidate(applicant.getUser().getEmail(), applicant.getUser().getFirstName(),applicant.getUser().getLastName(),jobApplication.getJob().getCompany());
                 jobApplication.setStatus(applicationStatus);

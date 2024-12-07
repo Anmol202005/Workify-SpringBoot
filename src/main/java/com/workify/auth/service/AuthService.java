@@ -90,7 +90,7 @@ public class AuthService {
 
             user.setFirstName(request.getFirstName());
             user.setLastName(request.getLastName());
-            user.setEmail(email);
+            user.setEmail(email.trim());
             user.setMobile(request.getMobile());
             user.setPassword(passwordEncoder.encode(password));
             user.setMembership(false);
