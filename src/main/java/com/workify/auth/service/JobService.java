@@ -105,28 +105,39 @@ public class JobService {
 
         Specification<Job> spec = (root, query, criteriaBuilder) -> {
             Predicate predicate = criteriaBuilder.conjunction();
-            if(title != null){
+
+            if (title != null) {
                 predicate = criteriaBuilder.and(predicate,
-                        criteriaBuilder.like(root.get("title"), "%" + title + "%"));
+                        criteriaBuilder.like(
+                                criteriaBuilder.lower(root.get("title")),
+                                "%" + title.toLowerCase() + "%"
+                        ));
             }
-            if(location != null){
+
+            if (location != null) {
                 predicate = criteriaBuilder.and(predicate,
-                        criteriaBuilder.like(root.get("location"), "%" + location + "%"));
+                        criteriaBuilder.like(
+                                criteriaBuilder.lower(root.get("location")),
+                                "%" + location.toLowerCase() + "%"
+                        ));
             }
-            if(minSalary != null){
+
+            if (minSalary != null) {
                 predicate = criteriaBuilder.and(predicate,
                         criteriaBuilder.greaterThanOrEqualTo(root.get("minSalary"), minSalary));
             }
-            if(maxSalary != null){
+
+            if (maxSalary != null) {
                 predicate = criteriaBuilder.and(predicate,
                         criteriaBuilder.lessThanOrEqualTo(root.get("maxSalary"), maxSalary));
             }
-            if(experience != null){
+
+            if (experience != null) {
                 predicate = criteriaBuilder.and(predicate,
                         criteriaBuilder.lessThanOrEqualTo(root.get("experience"), experience));
             }
 
-            if(requiredSkills != null && !requiredSkills.isEmpty()){
+            if (requiredSkills != null && !requiredSkills.isEmpty()) {
                 Join<Job, String> skillsJoin = root.join("requiredSkills");
                 List<String> lowerCaseSkills = requiredSkills.stream()
                         .map(String::toLowerCase)
@@ -134,18 +145,22 @@ public class JobService {
                 predicate = criteriaBuilder.and(predicate,
                         criteriaBuilder.lower(skillsJoin).in(lowerCaseSkills));
             }
-            if(type != null){
+
+            if (type != null) {
                 predicate = criteriaBuilder.and(predicate,
-                        criteriaBuilder.equal(root.get("jobType"),type));
+                        criteriaBuilder.equal(root.get("jobType"), type));
             }
-            if(mode!=null){
-                predicate=criteriaBuilder.and(predicate,
-                        criteriaBuilder.equal(root.get("mode"),mode));
+
+            if (mode != null) {
+                predicate = criteriaBuilder.and(predicate,
+                        criteriaBuilder.equal(root.get("mode"), mode));
             }
-            if(status!=null){
-                predicate=criteriaBuilder.and(predicate,
-                        criteriaBuilder.equal(root.get("jobStatus"),status));
+
+            if (status != null) {
+                predicate = criteriaBuilder.and(predicate,
+                        criteriaBuilder.equal(root.get("jobStatus"), status));
             }
+
             return predicate;
         };
         List<Job> filteredJobs = jobRepository.findAll(spec);
