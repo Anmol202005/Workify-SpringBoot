@@ -1,7 +1,7 @@
 # Workify - Professional Job Seeking Platform
 
 <p align="center">
-  <img src="https://i.ibb.co/JFcLX7v5/image-removebg-preview.png" alt="Workify Logo" width="200" height="200">
+  <img src="https://i.ibb.co/JFcLX7v5/image-removebg-preview.png" alt="Workify Logo" width="400" height="200">
 </p>
 
 <p align="center">
